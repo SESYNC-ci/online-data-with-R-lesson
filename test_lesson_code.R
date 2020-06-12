@@ -133,15 +133,6 @@ dbExecute(conn = fruit_db,
 # code block 11-12: increase page size parameter and repeatedly page through and stash
 query_params$pageSize <- 100
 
-# This is really long code and probably ends up confusing people. I'd like to find a simpler example.
-get_sugar_content <- function(fruit) {
-  nutrients <- map_dfr(fruit$foodNutrients, ~ data.frame(name = .$nutrientName, value = .$value)) 
-  sugar_content <- nutrients %>% 
-    filter(grepl('Sugar', name)) %>%
-    pull(value)
-  ifelse(length(sugar_content) == 1, sugar_content, as.numeric(NA))
-}
-
 for (i in 1:10) {
   # Advance page and query
   query_params$pageNumber <- i
@@ -149,12 +140,18 @@ for (i in 1:10) {
   page <- content(response, as = 'parsed')
   fruits <- page$foods
   
-  # Save page 
-  values <- map_dfr(fruits, 
-                    ~ data.frame(foodID = .$fdcId,
-                                 name = .$description,
-                                 sugar = get_sugar_content(.)))
-  
+  # Save page, using some purrr manipulation
+  # probably note that this is necessary because R isn't really set up to handle the nested list structures that APIs spit out
+  # the similar code in python might be shorter. 
+  # Luckily, there are some purrr functions that make it relatively straightforward.
+  values <- tibble(fruit = fruits) %>%
+    unnest_wider(fruit) %>%
+    unnest_longer(foodNutrients) %>%
+    unnest_wider(foodNutrients) %>%
+    filter(grepl('Sugars, total', nutrientName)) %>%
+    select(fdcId, description, value) %>%
+    setNames(c('foodID', 'name', 'sugar'))
+
   # Stash in database
   dbWriteTable(conn = fruit_db, name = 'Food', value = values, append = TRUE)
 
