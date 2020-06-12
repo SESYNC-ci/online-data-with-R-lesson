@@ -10,3 +10,9 @@ cache/
 docs/_site
 docs/.bundle
 docs/Gemfile.lock
+
+# Data.gov api key
+api_key.R
+
+# SQLite database created in lesson
+*.sqlite
