@@ -78,10 +78,26 @@ head(maryland_income)
 
 # Specialized Packages ----------------------------------------------------
 
+### note: acknowledge developer Hannah Recht, as well as Kyle Walker (tidycensus) if relevant
+
 # first code block: ACS5 for 2017 (not sure what this does)
+library(censusapi)
+source('api_key.R')
 
 # second and third code blocks: define what variables to get and pull from census pkg
+variables <- c('NAME', 'B19013_001E')
 
+maryland_income_by_tract <- getCensus(name = 'acs/acs5', vintage = 2017, vars = variables, region = 'tract:*', regionin = 'state:24+county:*')
+
+# This already goes thru and parses the output
+maryland_income_by_tract <- maryland_income_by_tract %>%
+  rename(median_household_income = B19013_001E) %>%
+  filter(median_household_income > 0) 
+
+library(ggplot2)
+
+ggplot(maryland_income_by_tract, aes(x = county, y = median_household_income)) +
+  geom_boxplot()
 
 # Paging and Stashing -----------------------------------------------------
 
@@ -91,7 +107,7 @@ source('api_key.R')
 # second code block: query the USDA API for fruit nutrition info
 api <- 'https://api.nal.usda.gov/fdc/v1/'
 path <- 'foods/search'
-query_params <- list('api_key' = API_KEY,
+query_params <- list('api_key' = Sys.getenv('DATAGOV_KEY'),
                      'query' = 'fruit')
 doc <- GET(paste0(api, path), query = query_params) %>%
   content(as = 'parsed')
