@@ -129,6 +129,7 @@ fruit$description
 # code block 9: list some of the nutrients (with purrr)
 library(purrr)
 library(dplyr)
+library(tidyr)
 
 map_dfr(fruit$foodNutrients, 
         ~ data.frame(name = .$nutrientName, value = .$value)) %>%
@@ -140,11 +141,12 @@ library(RSQLite)
 
 fruit_db <- dbConnect(SQLite(), 'fruits.sqlite') # Creates in WD
 
-dbExecute(conn = fruit_db,
-            'CREATE TABLE Food
-              (foodID INTEGER,
-               name TEXT,
-               sugar FLOAT)')
+# Turns out this isn't needed!!!
+# dbExecute(conn = fruit_db,
+#             'CREATE TABLE Food
+#               (foodID INTEGER,
+#                name TEXT,
+#                sugar FLOAT)')
 
 # code block 11-12: increase page size parameter and repeatedly page through and stash
 query_params$pageSize <- 100
