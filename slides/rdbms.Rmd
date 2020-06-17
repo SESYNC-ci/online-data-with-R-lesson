@@ -24,17 +24,17 @@ We might be interested in the relative nutrient content of different fruits.
 {:.notes}
 
 To repeat the exercise below at home, request an API key at
-https://api.data.gov/signup/, and store it in a file named `api_key.R`
-in your working directory. The file should contain the single line 
-`Sys.setenv(API_KEY = 'your many digit key')`.
+https://api.data.gov/signup/, and store it in a file named `datagov_api_key.R`
+in your working directory. The file should contain the line 
+`Sys.setenv(DATAGOV_KEY = 'your many digit key')`.
 {:.notes}
 
 ===
 
-Load the `API_KEY` variable as an environment variable by importing it from the file you saved it in.
+Load the `DATAGOV_KEY` variable as an environment variable by importing it from the file you saved it in.
 
 ```{r}
-source('api_key.R')
+source('datagov_api_key.R')
 ```
 
 ===
@@ -81,27 +81,40 @@ first page, with 50 items.
 length(doc$foods)
 ```
 
+===
 
-# code block 8: extract one fruit and see its name
+Continue to inspect the returned object. Extract one element from the list
+of `foods` and view its description.
+
+```{r}
 fruit <- doc$foods[[1]]
 fruit$description
+```
 
-# code block 9: list some of the nutrients (with purrr)
-library(purrr)
-library(dplyr)
-library(tidyr)
+===
 
+Use the `purrr` list manipulation package to view the first ten 
+nutrients in the food item and their amounts.
+
+```{r, handout = 0}
 map_dfr(fruit$foodNutrients, 
         ~ data.frame(name = .$nutrientName, value = .$value)) %>%
   head(10)
+```
 
-# code block 10: initialize 
-library(DBI) # RSQLite is a DBI compliant package, whatever that means, and itself contains sqlite
+===
+
+The `DBI` and `RSQLite` packages together allow R to connect to a 
+database-in-a-file. If the `fruits.sqlite` file does not exist
+in your working directory already when you try to connect,
+`dbConnect()` will create it.
+
+```{r, handout = 0}
+library(DBI) 
 library(RSQLite)
 
-fruit_db <- dbConnect(SQLite(), 'fruits.sqlite') # Creates in WD
-
-# code block 11-12: increase page size parameter and repeatedly page through and stash
+fruit_db <- dbConnect(SQLite(), 'fruits.sqlite') 
+```
 
 ===
 
@@ -148,7 +161,7 @@ for (i in 1:10) {
     setNames(c('foodID', 'name', 'sugar'))
 
   # Stash in database
-  dbWriteTable(conn = fruit_db, name = 'Food', value = values, append = TRUE)
+  dbWriteTable(fruit_db, name = 'Food', value = values, append = TRUE)
 
 }
 ```
@@ -159,7 +172,7 @@ View the records in the database by reading
 everything we have so far into a data frame.
 
 ```{r, handout = 0}
-fruit_sugar_content <- dbReadTable(conn = fruit_db, name = 'Food')
+fruit_sugar_content <- dbReadTable(fruit_db, name = 'Food')
 head(fruit_sugar_content, 10)
 ```
 
@@ -168,149 +181,7 @@ head(fruit_sugar_content, 10)
 Don't forget to disconnect from your database!
 
 ```{r, handout = 0}
-dbDisconnect(conn = fruit_db)
+dbDisconnect(fruit_db)
 ```
 
 
-
-
-
-
-===
-
-The following commands prepare Python to connect to a
-database-in-a-file, and create empty tables in the database if they
-do not already exist (meaning that it is safe to re-run after you have
-populated the database).
-
-===
-
-### Step 1: Boilerplate
-
-The SQLAlchemy package has a lot of features, and
-requires you to be very precise about how to get started.
-
-```{python, handout = 1, eval = FALSE}
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-
-Base = declarative_base()
-```
-
-===
-
-### Step 2: Table Definition
-
-Define the tables that are going to live in the database
-using Python classes. For each class, its attributes
-will map to columns in a table. Then create a session engine.
-
-```{python, handout = 1, eval = FALSE}
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, Text, Numeric
-
-Base = declarative_base()
-
-class Food(Base):
-    __tablename__ = 'food'
-    
-    id = Column(Integer, primary_key=True)
-    name = Column(Text)
-    sugar = Column(Numeric)
-    
-engine = create_engine('sqlite:///fruits.db')
-Base.metadata.create_all(engine)
-Session = sessionmaker(bind=engine)
-```
-
-===
-
-For each fruit, we'll store its name and the amount of sugar
-(grams of sugar per 100 grams of fruit) found in the API response.
-
-```{python}
-fruit = doc['foods'].pop()
-fruit['description']
-```
-
-Here are the names and values of some of the nutrients for the first item returned by the query.
-
-```{r}
-[ (nutrient['nutrientName'], nutrient['value']) for nutrient in fruit['foodNutrients'][:9] ]
-```
-===
-
-### Step 3: Connect (and Initialize)
-
-```{r, handout = 0}
-from schema import Session, Food
-
-session = Session()
-engine = session.bind
-```
-
-===
-
-You could inspect the fruit database now using any sqlite3 client: you
-would find one empty "food" table with fields "id", "name", and "sugar".
-
-===
-
-Add a new `pageSize` parameter to request `100` documents per page.
-
-
-```{r, handout = 0}
-query['pageSize'] = 100
-```
-
-===
-
-In each request, advance the query parameter `pageNumber` by one. 
-The first record retrieved will be `pageNumber * pageSize`. 
-Insert the fruits (the key:value pairs stored in `values`) 
-in bulk to the database with `engine.execute()`.
-
-In each iteration of the loop, we use a list comprehension to
-extract the value corresponding to the amount of sugar from each
-of the foods in the page of results returned by the query.
-{:.notes}
-
-```{r, handout = 0}
-table = Food.metadata.tables['food']
-for i in range(0, 10):
-    
-    # advance page and query
-    query['pageNumber'] = i 
-    response = requests.get(api + path, params=query)
-    page = response.json()
-    fruits = page['foods']
-    
-    # save page with session engine
-    values = [{'name': fruit['description'],
-               'sugar': next(iter([ nutrient['value'] for nutrient in fruit['foodNutrients'] if nutrient['nutrientName'][0:5] == 'Sugar' ]), None) } for fruit in fruits]
-               
-    insert = table.insert().values(values)
-    engine.execute(insert)
-```
-
-===
-
-View the records in the database by reading
-everything we have so far back into a `DataFrame`.
-
-```{r, handout = 0}
-import pandas as pd
-
-df = pd.read_sql_table('food', engine)
-```
-
-===
-
-Don't forget to disconnect from your database!
-
-```{r, handout = 0}
-engine.dispose()
-```

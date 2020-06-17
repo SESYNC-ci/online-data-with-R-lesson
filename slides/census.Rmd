@@ -16,9 +16,17 @@ exists: a dedicated package in your programming language's repository
 The [censusapi](){:.rlib} package, developed by Hannah Recht,
 is a user-contributed suite of tools that streamline access to the API.
 
+To repeat the exercise below at home, request an API key at
+https://api.census.gov/data/key_signup.html, and store it in a file named `census_api_key.R`
+in your working directory. The file should contain the line 
+`Sys.setenv(CENSUS_KEY = 'your many digit key')`. This creates a hidden
+environment variable containing the key.
+{:.notes}
+
+
 ```{r, handout = 0}
 library(censusapi)
-source('api_key.R')
+source('census_api_key.R')
 ```
 
 ===
@@ -38,6 +46,12 @@ Compared to using the API directly via the [requests](){:.pylib} package:
 
 Query the Census ACS5 survey (American Community Survey) for the variable `B19001_001E` (median annual household income,
 in dollars) and each entity's `NAME`.
+
+The American Community Survey (ACS) is a yearly survey that provides detailed population
+and housing information at fine geographic scale across the United States. Much of the 
+[censusapi](){:.rlib} package is dedicated to accessing the ACS data. ACS5 refers to a five-year
+average of the annual surveys.
+{:.notes}
 
 ```{r, handout = 0}
 variables <- c('NAME', 'B19013_001E')
