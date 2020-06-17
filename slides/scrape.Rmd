@@ -11,29 +11,33 @@ serve](https://xkcd.com/869/).
 
 ===
 
-The [requests](){:.pylib} package provides a simple interface to
+The [httr](){:.rlib} package provides a simple interface to
 issuing HTTP requests and handling the response. Here's an example
 using an [XKCD comic](https://xkcd.com/869/).
 
-```{python, handout = 0}
-import requests
+```{r, handout = 0}
+library(httr)
 
-response = requests.get('https://xkcd.com/869')
+response <- GET('https://xkcd.com/869')
 response
 ```
 
 ===
 
 The response is still binary. It takes a browser-like parser to
-translate the raw content into an HTML
-document. [BeautifulSoup](){:.pylib} does a fair job, while making no
-attempt to "render" a human-readable page.
+translate the raw content into an HTML document. 
+[rvest](){:.rlib}, a (bad) pun on "harvest" because it harvests
+the content of Web pages, does a fair job, while making no
+attempt to "render" a human-readable page. The [htmltidy]{:.rlib}
+package can be used to display an easier-to-read version with indentations 
+and line breaks in your Viewer pane.
 
-```{python, handout = 0}
-from bs4 import BeautifulSoup
+```{r, handout = 0}
+library(rvest) 
+library(htmltidy)
 
-doc = BeautifulSoup(response.text, 'lxml')
-'\n'.join(doc.prettify().splitlines()[0:10])
+doc <- read_html(response) %>%
+  html_view
 ```
 
 ===
@@ -42,9 +46,11 @@ Searching the document for desired content is the hard part. This search
 uses a CSS query to find the image below a section of the document with
 attribute `id = comic`.
 
-```{python, handout = 0}
-img = doc.select('#comic > img')
+```{r, handout = 0}
+img <- doc %>%
+  html_nodes('#comic > img') 
 img
+
 ```
 
 ===
@@ -52,9 +58,14 @@ img
 It makes sense to query by CSS if the content being scraped always appears
 the same in a browser; stylesheets are separate from delivered content.
 
-```{python, handout = 0}
-img = doc.select_one('#comic > img')
-img['title']
+```{r, handout = 0}
+img <- doc %>%
+  html_node('#comic > img') 
+
+img_attrs <- img %>%
+  html_attrs()
+
+img_attrs['title']
 ```
 
 ===
@@ -79,15 +90,18 @@ documentation for their data services in a massive table:
 
 ===
 
-```{python, handout = 0}
-import pandas as pd
+Set `fill = TRUE` when you convert the html table into an R 
+data frame, so that inconsistent numbers of columns in each row
+are filled in.
 
-vars = (
-  pd
-  .read_html('https://api.census.gov/data/2017/acs/acs5/variables.html')
-  .pop()
-)
-vars.head()
+```{r, handout = 0}
+census_vars_doc <- read_html('https://api.census.gov/data/2017/acs/acs5/variables.html') %>% 
+  html_node('table')
+
+# This line takes a few moments to run.
+census_vars <- html_table(census_vars_doc, fill = TRUE) 
+
+head(census_vars)
 ```
 
 ===
@@ -95,11 +109,8 @@ vars.head()
 We can use our data manipulation tools to search this unwieldy
 documentation for variables of interest.
 
-```{python, handout = 0}
-idx = (
-  vars['Label']
-  .str
-  .contains('Median household income')
-)
-vars.loc[idx, ['Name', 'Label']]
+```{r, handout = 0}
+census_vars %>%
+  filter(grepl('Median household income', Label)) %>%
+  select(Name, Label)
 ```

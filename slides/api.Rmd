@@ -55,14 +55,13 @@ the URL in a standards-compliant way that the service will recognize.
 
 ===
 
-```{python, handout = 0}
-path = 'https://api.census.gov/data/2017/acs/acs5'
-query = {
-  'get': 'NAME,B19013_001E',
-  'for': 'tract:*',
-  'in': 'state:24',
-}
-response = requests.get(path, params=query)
+```{r, handout = 0}
+path <- 'https://api.census.gov/data/2017/acs/acs5'
+query_params <- list('get' = 'NAME,B19013_001E', 
+                     'for' = 'tract:*',
+                     'in' = 'state:24')
+
+response = GET(path, query = query_params)
 response
 ```
 
@@ -88,21 +87,32 @@ Most REST APIs return as the "content" either:
 
 The header from Census says the content type is JSON.
 
-```{python, handout = 0}
-response.headers['Content-Type']
+```{r, handout = 0}
+response$headers['content-type']
 ```
 
 ===
 
 ## Response Content
 
-Use a JSON reader to extract a Python object. To read it into
-a pandas `DataFrame`, use pandas' `read_json`.
+Use a JSON reader to extract an R object from the JSON content. 
+To read it into a data frame, use `jsonlite::fromJSON()`.
 
-```{python, handout = 0}
-data = pd.read_json(response.content)
-data.head()
+```{r, handout = 0}
+library(jsonlite)
+
+maryland_income <- response %>%
+  content(as = 'text') %>%
+  fromJSON()
+
+head(maryland_income)
 ```
+
+The data frame extracted here does not recognize that the first
+row is a header, resulting in all columns being classified as 
+character. This is a typical situation when parsing Web content. 
+You can try to fix this problem as an optional exercise.
+{:.notes}
 
 ===
 

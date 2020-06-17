@@ -5,7 +5,7 @@
 
 The third tier of access to online data is much preferred, if it
 exists: a dedicated package in your programming language's repository
-([PyPI](http://pypi.python.org) or [CRAN](http://cran.r-project.org)).
+[CRAN](http://cran.r-project.org)) or ([PyPI](http://pypi.python.org).
 
 - Additional guidance on query parameters
 - Returns data in native formats
@@ -13,15 +13,12 @@ exists: a dedicated package in your programming language's repository
 
 ===
 
-The [census](){:.pylib} package is a user-contributed suite of tools
-that streamline access to the API.
+The [censusapi](){:.rlib} package, developed by Hannah Recht,
+is a user-contributed suite of tools that streamline access to the API.
 
-```{python, handout = 0}
-from census import Census
-
-key = None
-c = Census(key, year=2017)
-c.acs5
+```{r, handout = 0}
+library(censusapi)
+source('api_key.R')
 ```
 
 ===
@@ -39,55 +36,44 @@ Compared to using the API directly via the [requests](){:.pylib} package:
 
 ===
 
-Query the Census ACS5 survey for the variable `B19001_001E` (median annual household income,
+Query the Census ACS5 survey (American Community Survey) for the variable `B19001_001E` (median annual household income,
 in dollars) and each entity's `NAME`.
 
-```{python, handout = 0}
-variables = ('NAME', 'B19013_001E')
+```{r, handout = 0}
+variables <- c('NAME', 'B19013_001E')
 ```
 
 ===
 
 This code pulls the variables `NAME` and `B19001_001E` from all census tracts and all
-counties in the state with ID `24` (Maryland). The [census](){:.pylib} package converts the JSON string 
-into a Python dictionary. (No need to check headers.) 
+counties in the state with ID `24` (Maryland). The [censusapi](){:.rlib} package 
+converts the JSON string into a data frame. (No need to check headers.) 
 
-```{python, handout = 0}
-response = c.acs5.state_county_tract(
-    variables,
-    state_fips='24',
-    county_fips=Census.ALL,
-    tract=Census.ALL,
-)
-response[0]
+```{r, handout = 0}
+maryland_income_by_tract <- getCensus(name = 'acs/acs5', 
+                                      vintage = 2017, 
+                                      vars = variables, 
+                                      region = 'tract:*', 
+                                      regionin = 'state:24+county:*')
+
+head(maryland_income_by_tract)
 ```
 
 ===
 
-The Pandas `DataFrame()` constructor will accept the list of
-dictionaries as the sole argument, taking column names from "keys". 
-This code also removes values less than zero.
+We can use our `dplyr` tools to manipulate the output of `getCensus`, 
+and `ggplot2` to create boxplots showing the income distribution among
+census tracts within each county in Maryland.
 
-```{python, handout = 0}
-df = (
-  pd
-  .DataFrame(response)
-  .query("B19013_001E >= 0")
-)
+```{r, handout = 0}
+library(ggplot2)
+
+maryland_income_by_tract <- maryland_income_by_tract %>%
+  rename(median_household_income = B19013_001E) %>%
+  filter(median_household_income > 0) 
+
+ggplot(maryland_income_by_tract, aes(x = county, y = median_household_income)) +
+  geom_boxplot()
+
 ```
 
-===
-
-The [seaborn](){:.pylib} package provides some nice, quick visualizations. Here
-we create boxplots showing the income distribution among census tracts within
-each county in Maryland.
-
-```{python, handout = 0, eval = FALSE}
-import seaborn as sns
-
-sns.boxplot(
-  data = df,
-  x = 'county',
-  y = 'B19013_001E',
-)
-```

@@ -15,3 +15,5 @@ purpose if the API wasn't designed for public use! Even if you plan to acquire
 data using the "raw" web service, try a search for a relevant package on Python.
 The package documentation could help.
 {:.notes}
+
+also note Kyle Walker's tidycensus stuff here
