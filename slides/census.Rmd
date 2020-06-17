@@ -4,8 +4,8 @@
 ## Specialized Packages
 
 The third tier of access to online data is much preferred, if it
-exists: a dedicated package in your programming language's repository
-[CRAN](http://cran.r-project.org)) or ([PyPI](http://pypi.python.org).
+exists: a dedicated package in your programming language's repository,
+[CRAN](http://cran.r-project.org) or [PyPI](http://pypi.python.org).
 
 - Additional guidance on query parameters
 - Returns data in native formats
@@ -24,7 +24,7 @@ environment variable containing the key.
 {:.notes}
 
 
-```{r, handout = 0}
+```{r, handout = 0, message = FALSE}
 library(censusapi)
 source('census_api_key.R')
 ```
@@ -64,30 +64,32 @@ counties in the state with ID `24` (Maryland). The [censusapi](){:.rlib} package
 converts the JSON string into a data frame. (No need to check headers.) 
 
 ```{r, handout = 0}
-maryland_income_by_tract <- getCensus(name = 'acs/acs5', 
-                                      vintage = 2017, 
-                                      vars = variables, 
-                                      region = 'tract:*', 
-                                      regionin = 'state:24+county:*')
+tract_income <- getCensus(name = 'acs/acs5', 
+                          vintage = 2017, 
+                          vars = variables, 
+                          region = 'tract:*', 
+                          regionin = 'state:24+county:*')
 
-head(maryland_income_by_tract)
+head(tract_income)
 ```
 
 ===
 
-We can use our `dplyr` tools to manipulate the output of `getCensus`, 
-and `ggplot2` to create boxplots showing the income distribution among
+We can use our `dplyr` tools to manipulate the output of `getCensus`.
+
+```{r, handout = 0}
+tract_income <- tract_income %>%
+  rename(household_income = B19013_001E) %>%
+  filter(household_income > 0) 
+```
+
+===
+
+We can use `ggplot2` to create boxplots showing the income distribution among
 census tracts within each county in Maryland.
 
 ```{r, handout = 0}
-library(ggplot2)
-
-maryland_income_by_tract <- maryland_income_by_tract %>%
-  rename(median_household_income = B19013_001E) %>%
-  filter(median_household_income > 0) 
-
-ggplot(maryland_income_by_tract, aes(x = county, y = median_household_income)) +
+ggplot(tract_income, aes(x = county, y = household_income)) +
   geom_boxplot()
-
 ```
 

@@ -95,12 +95,12 @@ response$headers['content-type']
 
 ## Response Content
 
-Use a JSON reader to extract an R object from the JSON content. 
-To read it into a data frame, use `jsonlite::fromJSON()`.
+First, use `httr::content()` to retrieve
+the JSON content of the response as a character vector, then
+`jsonlite::fromJSON()` to convert it to a data frame.
 
-```{r, handout = 0}
+```{r, handout = 0, message = FALSE}
 library(jsonlite)
-
 maryland_income <- response %>%
   content(as = 'text') %>%
   fromJSON()

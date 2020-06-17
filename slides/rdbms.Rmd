@@ -39,7 +39,7 @@ source('datagov_api_key.R')
 
 ===
 
-Run an API query for all foods with `"fruit"` in their name.
+Run an API query for all foods with `"fruit"` in their name and parse the content of the response.
 
 ```{r, handout = 0}
 api <- 'https://api.nal.usda.gov/fdc/v1/'
@@ -98,7 +98,8 @@ nutrients in the food item and their amounts.
 
 ```{r, handout = 0}
 map_dfr(fruit$foodNutrients, 
-        ~ data.frame(name = .$nutrientName, value = .$value)) %>%
+        ~ data.frame(name = .$nutrientName, 
+                     value = .$value)) %>%
   head(10)
 ```
 
@@ -109,7 +110,7 @@ database-in-a-file. If the `fruits.sqlite` file does not exist
 in your working directory already when you try to connect,
 `dbConnect()` will create it.
 
-```{r, handout = 0}
+```{r, handout = 0, message = FALSE}
 library(DBI) 
 library(RSQLite)
 
@@ -138,6 +139,8 @@ nested list structures that APIs return. If we were using
 a specialized API R package, typically it would handle this data wrangling 
 for us.
 {:.notes}
+
+===
 
 Insert the fruits (the three-column data frame `values`) 
 in bulk to the database with `dbWriteTable()`.

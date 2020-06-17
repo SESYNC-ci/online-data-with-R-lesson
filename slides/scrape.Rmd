@@ -15,7 +15,7 @@ The [httr](){:.rlib} package provides a simple interface to
 issuing HTTP requests and handling the response. Here's an example
 using an [XKCD comic](https://xkcd.com/869/).
 
-```{r, handout = 0}
+```{r, handout = 0, message = FALSE}
 library(httr)
 
 response <- GET('https://xkcd.com/869')
@@ -26,19 +26,27 @@ response
 
 The response is still binary. It takes a browser-like parser to
 translate the raw content into an HTML document. 
-[rvest](){:.rlib}, a (bad) pun on "harvest" because it harvests
-the content of Web pages, does a fair job, while making no
-attempt to "render" a human-readable page. The [htmltidy]{:.rlib}
-package can be used to display an easier-to-read version with indentations 
-and line breaks in your Viewer pane.
+[rvest](){:.rlib} does the translating. 
 
-```{r, handout = 0}
+```{r, handout = 0, message = FALSE}
 library(rvest) 
-library(htmltidy)
 
 doc <- read_html(response)
+doc
+```
+
+===
+
+[htmltidy](){:.rlib}
+displays an easier-to-read version with indentations 
+and line breaks in your Viewer pane.
+
+```{r, eval = FALSE}
+library(htmltidy)
 html_view(doc)
 ```
+
+![screenshot of html view]({% include asset.html path = 'images/html_view_screenshot.PNG' %}){:.small-image}
 
 ===
 
@@ -46,11 +54,10 @@ Searching the document for desired content is the hard part. This search
 uses a CSS query to find the image below a section of the document with
 attribute `id = comic`.
 
-```{r, handout = 0}
+```{r}
 img <- doc %>%
   html_nodes('#comic > img') 
 img
-
 ```
 
 ===
@@ -106,15 +113,19 @@ head(census_vars)
 
 ===
 
-We can use our data manipulation tools to search this unwieldy
+We can use our tidy data tools to search this unwieldy
 documentation for variables of interest.
 
-```{r, handout = 0}
+The call to `set_tidy_names()` is necessary because the table
+extraction results in some columns with undefined names---a
+common occurrence when parsing Web content.
+{:.notes}
+
+```{r, handout = 0, message = FALSE}
 library(tidyverse)
 
 census_vars %>%
   set_tidy_names() %>%
   select(Name, Label) %>%
   filter(grepl('Median household income', Label))
-  
 ```
