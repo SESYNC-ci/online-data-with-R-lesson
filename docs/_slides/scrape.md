@@ -28,7 +28,7 @@ response
 
 ~~~
 Response [https://xkcd.com/869/]
-  Date: 2020-06-17 19:25
+  Date: 2020-06-18 01:29
   Status: 200
   Content-Type: text/html; charset=UTF-8
   Size: 7.54 kB

@@ -13,19 +13,19 @@ exists: a dedicated package in your programming language's repository,
 
 ===
 
-The [censusapi](){:.rlib} package, developed by Hannah Recht,
-is a user-contributed suite of tools that streamline access to the API.
+The [tidycensus](){:.rlib} package, developed by Kyle Walker,
+streamlines access to the API and is integrated with [tidyverse](){:.rlib} packages.
 
 To repeat the exercise below at home, request an API key at
 https://api.census.gov/data/key_signup.html, and store it in a file named `census_api_key.R`
 in your working directory. The file should contain the line 
-`Sys.setenv(CENSUS_KEY = 'your many digit key')`. This creates a hidden
+`Sys.setenv(CENSUS_API_KEY = 'your many digit key')`. This creates a hidden
 environment variable containing the key.
 {:.notes}
 
 
 ```{r, handout = 0, message = FALSE}
-library(censusapi)
+library(tidycensus)
 source('census_api_key.R')
 ```
 
@@ -49,7 +49,7 @@ in dollars) and each entity's `NAME`.
 
 The American Community Survey (ACS) is a yearly survey that provides detailed population
 and housing information at fine geographic scale across the United States. Much of the 
-[censusapi](){:.rlib} package is dedicated to accessing the ACS data. ACS5 refers to a five-year
+[tidycensus](){:.rlib} package is dedicated to accessing the ACS data. ACS5 refers to a five-year
 average of the annual surveys.
 {:.notes}
 
@@ -59,37 +59,31 @@ variables <- c('NAME', 'B19013_001E')
 
 ===
 
-This code pulls the variables `NAME` and `B19001_001E` from all census tracts and all
-counties in the state with ID `24` (Maryland). The [censusapi](){:.rlib} package 
+This code pulls the variables `NAME` and `B19001_001E` from all counties
+in Maryland. The [tidycensus](){:.rlib} package 
 converts the JSON string into a data frame. (No need to check headers.) 
 
 ```{r, handout = 0}
-tract_income <- getCensus(name = 'acs/acs5', 
-                          vintage = 2017, 
-                          vars = variables, 
-                          region = 'tract:*', 
-                          regionin = 'state:24+county:*')
+county_income <- get_acs(geography = 'county',
+                         variables = variables,
+                         state = 'MD',
+                         year = 2018,
+                         geometry = TRUE)
 
-head(tract_income)
+head(county_income)
 ```
 
 ===
 
-We can use our `dplyr` tools to manipulate the output of `getCensus`.
+We can use [dplyr](){.rlib} to manipulate the output, and [ggplot2](){.rlib} to visualize the data.
+Because we set `geometry = TRUE`, [tidycensus](){.rlib} even includes spatial information in its
+output that we can use to create maps!
 
 ```{r, handout = 0}
-tract_income <- tract_income %>%
-  rename(household_income = B19013_001E) %>%
-  filter(household_income > 0) 
-```
-
-===
-
-We can use `ggplot2` to create boxplots showing the income distribution among
-census tracts within each county in Maryland.
-
-```{r, handout = 0}
-ggplot(tract_income, aes(x = county, y = household_income)) +
-  geom_boxplot()
+ggplot(county_income) + 
+  geom_sf(aes(fill = estimate), color = NA) + 
+  coord_sf() + 
+  theme_minimal() + 
+  scale_fill_viridis_c()
 ```
 

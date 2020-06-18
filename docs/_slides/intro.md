@@ -3,7 +3,7 @@
 
 ## Lesson Objectives
 
-- Distinguish three types of online data
+- Distinguish three ways of acquiring online data
 - Break down how web services use HTTP
 - Learn R tools for data acquisition
 

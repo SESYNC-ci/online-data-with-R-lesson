@@ -71,7 +71,7 @@ response
 
 ~~~
 Response [https://api.census.gov/data/2017/acs/acs5?get=NAME%2CB19013_001E&for=tract%3A%2A&in=state%3A24]
-  Date: 2020-06-17 19:34
+  Date: 2020-06-18 01:38
   Status: 200
   Content-Type: application/json;charset=utf-8
   Size: 115 kB

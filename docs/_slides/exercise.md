@@ -7,8 +7,8 @@
 
 Identify the name of the census variable in the table of ACS variables whose
 label includes "COUNT OF THE POPULATION". Next, use the Census API to collect
-the data for this variable, for every county in the U.S. state with FIPS code
-'24', into a data frame. *Bonus*: Create a visualization of your choice.
+the data for this variable, for every county in Maryland (FIPS code 24) 
+into a data frame. *Bonus*: Create a visualization of your choice.
 
 ### Exercise 2
 
