@@ -1,10 +1,14 @@
 ## Online Data with R
 
-brief lesson description for potential students
+This lesson will teach you the basics of how data are stored on the web, and how to get data from the web with R using:
+
+- web scraping
+- APIs
+- specialized R packages
 
 ## Instructor Notes
 
-tips on running the tutorial for instructors
+This is very similar to the [python online data lesson](https://cyberhelp.sesync.org/online-data-lesson). It may be possible to skip the first of the three sections (scraping and manually parsing HTML), since students may find the other two (accessing data from APIs with and without specialized R packages) more useful.
 
 ## Cyberhelp @SESYNC
 

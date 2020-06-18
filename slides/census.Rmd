@@ -63,20 +63,22 @@ This code pulls the variables `NAME` and `B19001_001E` from all counties
 in Maryland. The [tidycensus](){:.rlib} package 
 converts the JSON string into a data frame. (No need to check headers.) 
 
-```{r, handout = 0}
+```{r, handout = 0, message = FALSE, results = 'hide'}
 county_income <- get_acs(geography = 'county',
                          variables = variables,
                          state = 'MD',
                          year = 2018,
                          geometry = TRUE)
+```
 
+```{r}
 head(county_income)
 ```
 
 ===
 
-We can use [dplyr](){.rlib} to manipulate the output, and [ggplot2](){.rlib} to visualize the data.
-Because we set `geometry = TRUE`, [tidycensus](){.rlib} even includes spatial information in its
+We can use [dplyr](){:.rlib} to manipulate the output, and [ggplot2](){:.rlib} to visualize the data.
+Because we set `geometry = TRUE`, [tidycensus](){:.rlib} even includes spatial information in its
 output that we can use to create maps!
 
 ```{r, handout = 0}
