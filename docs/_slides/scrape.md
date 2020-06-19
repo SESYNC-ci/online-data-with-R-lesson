@@ -151,11 +151,12 @@ of columns in each row are filled in.
 
 
 ~~~r
-census_vars_doc <- read_html('https://api.census.gov/data/2017/acs/acs5/variables.html') %>% 
-  html_node('table')
+census_vars_doc <- read_html('https://api.census.gov/data/2017/acs/acs5/variables.html')
+
+table_raw <- html_node(census_vars_doc, 'table')
 
 # This line takes a few moments to run.
-census_vars <- html_table(census_vars_doc, fill = TRUE) 
+census_vars <- html_table(table_raw, fill = TRUE) 
 
 head(census_vars)
 ~~~

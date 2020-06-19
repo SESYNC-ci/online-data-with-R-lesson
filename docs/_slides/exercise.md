@@ -12,12 +12,19 @@ on the output of `read_html()` with the argument `xpath='//*[@id="mw-content-tex
 to extract the table element from the HTML content, then call a third function to 
 convert the HTML table to a data frame.
 
+[View solution](#solution-1)
+{:.notes}
+
 ### Exercise 2
 
 Identify the name of the census variable in the table of ACS variables whose
-label includes "COUNT OF THE POPULATION". Next, use the Census API to collect
+"Concept" column includes "COUNT OF THE POPULATION". Next, use the Census API to collect
 the data for this variable, for every county in Maryland (FIPS code 24) 
-into a data frame. Create a map or figure to visualize the data.
+into a data frame. *Optional*: Create a map or figure to visualize the data.
+
+[View solution](#solution-2)
+{:.notes}
+
 
 ### Exercise 3
 
@@ -28,3 +35,110 @@ choice into a new SQLite file.
 
 [Wikipedia list of countries by population]: https://en.wikipedia.org/wiki/List_of_countries_and_dependencies_by_population
 [API key for data.gov]: https://api.data.gov/signup/
+
+[View solution](#solution-3)
+{:.notes}
+
+
+===
+
+## Solutions
+
+===
+
+### Solution 1
+
+```{r eval = FALSE}
+library(rvest)
+url <- 'https://en.wikipedia.org/wiki/List_of_countries_and_dependencies_by_population'
+doc <- read_html(url)
+table_node <- html_node(doc, xpath='//*[@id="mw-content-text"]/div/table[1]')
+pop_table <- html_table(table_node)
+```
+
+[Return](#exercise-1)
+{:.notes}
+
+===
+
+### Solution 2
+
+```{r eval = FALSE}
+library(tidyverse)
+library(tidycensus)
+source('census_api_key.R')
+
+# Using the previously created census_vars table, find the variable ID for population count.
+census_vars <- set_tidy_names(census_vars)
+population_vars <- census_vars %>%
+  filter(grepl('COUNT OF THE POPULATION', Concept))
+pop_var_id <- population_vars$Name[1]
+
+# Use tidycensus to query the API.
+county_pop <- get_acs(geography = 'county',
+                      variables = pop_var_id,
+                      state = 'MD',
+                      year = 2018,
+                      geometry = TRUE)
+
+# Map of counties by population
+ggplot(county_pop) + 
+  geom_sf(aes(fill = estimate), color = NA) + 
+  coord_sf() + 
+  theme_minimal() + 
+  scale_fill_viridis_c()
+```
+
+[Return](#exercise-2)
+{:.notes}
+
+===
+
+### Solution 3
+
+Here is a possible solution getting the protein content from different kinds of cheese.
+
+```{r eval = FALSE}
+library(httr)
+library(DBI) 
+library(RSQLite)
+
+source('datagov_api_key.R')
+
+api <- 'https://api.nal.usda.gov/fdc/v1/'
+path <- 'foods/search'
+
+query_params <- list('api_key' = Sys.getenv('DATAGOV_KEY'),
+                     'query' = 'cheese',
+                     'pageSize' = 100)
+
+# Create a new database
+cheese_db <- dbConnect(SQLite(), 'cheese.sqlite') 
+
+for (i in 1:3) {
+  # Advance page and query
+  query_params$pageNumber <- i
+  response <- GET(paste0(api, path), query = query_params) 
+  page <- content(response, as = 'parsed')
+
+  # Convert nested list to data frame
+  values <- tibble(food = page$foods) %>%
+    unnest_wider(food) %>%
+    unnest_longer(foodNutrients) %>%
+    unnest_wider(foodNutrients) %>%
+    filter(grepl('Protein', nutrientName)) %>%
+    select(fdcId, description, value) %>%
+    setNames(c('foodID', 'name', 'protein'))
+  
+  # Stash in database
+  dbWriteTable(cheese_db, name = 'Food', value = values, append = TRUE)
+  
+}
+
+dbDisconnect(cheese_db)
+```
+
+[Return](#exercise-3)
+{:.notes}
+
+===

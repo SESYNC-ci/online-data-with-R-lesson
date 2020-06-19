@@ -235,72 +235,7 @@ in bulk to the database with `dbWriteTable()`.
 
 
 
-~~~r
-for (i in 1:10) {
-  # Advance page and query
-  query_params$pageNumber <- i
-  response <- GET(paste0(api, path), query = query_params) 
-  page <- content(response, as = 'parsed')
-  fruits <- page$foods
-  
-  # Convert nested list to data frame
-  values <- tibble(fruit = fruits) %>%
-    unnest_wider(fruit) %>%
-    unnest_longer(foodNutrients) %>%
-    unnest_wider(foodNutrients) %>%
-    filter(grepl('Sugars, total', nutrientName)) %>%
-    select(fdcId, description, value) %>%
-    setNames(c('foodID', 'name', 'sugar'))
 
-  # Stash in database
-  dbWriteTable(fruit_db, name = 'Food', value = values, append = TRUE)
-
-}
-~~~
-{:title="{{ site.data.lesson.handouts[0] }}" .text-document}
-
-
-===
-
-View the records in the database by reading
-everything we have so far into a data frame
-with `dbReadTable()`.
-
-
-
-~~~r
-fruit_sugar_content <- dbReadTable(fruit_db, name = 'Food')
-head(fruit_sugar_content, 10)
-~~~
-{:title="{{ site.data.lesson.handouts[0] }}" .text-document}
-
-
-~~~
-   foodID                                       name sugar
-1  789246       Fruit leather and fruit snacks candy 53.37
-2  781278 Fruit smoothie, with whole fruit and dairy  8.28
-3  786863 Fruit smoothie, with whole fruit, no dairy  8.20
-4  789150                                Fruit sauce 36.23
-5  786838                                Soup, fruit 14.77
-6  789114                                Fruit syrup 53.00
-7  784748                               Bread, fruit 24.96
-8  167781                              Candied fruit 80.68
-9  784768                      Cheesecake with fruit 15.27
-10 784566                           Croissant, fruit 13.98
-~~~
-{:.output}
-
-
-===
-
-Don't forget to disconnect from your database!
-
-
-
-~~~r
-dbDisconnect(fruit_db)
-~~~
-{:title="{{ site.data.lesson.handouts[0] }}" .text-document}
 
 
 

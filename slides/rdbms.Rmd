@@ -162,11 +162,10 @@ for (i in 1:10) {
   query_params$pageNumber <- i
   response <- GET(paste0(api, path), query = query_params) 
   page <- content(response, as = 'parsed')
-  fruits <- page$foods
-  
+
   # Convert nested list to data frame
-  values <- tibble(fruit = fruits) %>%
-    unnest_wider(fruit) %>%
+  values <- tibble(food = page$foods) %>%
+    unnest_wider(food) %>%
     unnest_longer(foodNutrients) %>%
     unnest_wider(foodNutrients) %>%
     filter(grepl('Sugars, total', nutrientName)) %>%

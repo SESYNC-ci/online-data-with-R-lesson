@@ -18,8 +18,9 @@ str_extract_all(pdo_text_2017[1], "[0-9-.]+")
 
 ## HTML Tables
 
-census_vars_doc <- ...('https://api.census.gov/data/2017/acs/acs5/variables.html') %>% 
-  html_node(...)
+census_vars_doc <- ...('https://api.census.gov/data/2017/acs/acs5/variables.html')
+
+table_raw <- html_node(census_vars_doc, ...)
 
 census_vars <- html_table(..., fill = TRUE) 
 
@@ -102,11 +103,10 @@ for (i in 1:10) {
   query_params$pageNumber <- ...
   response <- GET(paste0(api, path), query = query_params) 
   page <- content(response, as = 'parsed')
-  fruits <- page$foods
-  
+
   # Convert nested list to data frame
-  values <- tibble(fruit = fruits) %>%
-    unnest_wider(fruit) %>%
+  values <- tibble(food = page$foods) %>%
+    unnest_wider(food) %>%
     unnest_longer(foodNutrients) %>%
     unnest_wider(foodNutrients) %>%
     filter(grepl('Sugars, total', nutrientName)) %>%
