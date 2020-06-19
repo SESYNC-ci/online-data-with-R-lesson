@@ -48,13 +48,17 @@ choice into a new SQLite file.
 
 ### Solution 1
 
-```{r eval = FALSE}
-library(rvest)
-url <- 'https://en.wikipedia.org/wiki/List_of_countries_and_dependencies_by_population'
-doc <- read_html(url)
-table_node <- html_node(doc, xpath='//*[@id="mw-content-text"]/div/table[1]')
-pop_table <- html_table(table_node)
-```
+
+
+~~~r
+> library(rvest)
+> url <- 'https://en.wikipedia.org/wiki/List_of_countries_and_dependencies_by_population'
+> doc <- read_html(url)
+> table_node <- html_node(doc, xpath='//*[@id="mw-content-text"]/div/table[1]')
+> pop_table <- html_table(table_node)
+~~~
+{:title="Console" .no-eval .input}
+
 
 [Return](#exercise-1)
 {:.notes}
@@ -63,31 +67,35 @@ pop_table <- html_table(table_node)
 
 ### Solution 2
 
-```{r eval = FALSE}
-library(tidyverse)
-library(tidycensus)
-source('census_api_key.R')
 
-# Using the previously created census_vars table, find the variable ID for population count.
-census_vars <- set_tidy_names(census_vars)
-population_vars <- census_vars %>%
-  filter(grepl('COUNT OF THE POPULATION', Concept))
-pop_var_id <- population_vars$Name[1]
 
-# Use tidycensus to query the API.
-county_pop <- get_acs(geography = 'county',
-                      variables = pop_var_id,
-                      state = 'MD',
-                      year = 2018,
-                      geometry = TRUE)
+~~~r
+> library(tidyverse)
+> library(tidycensus)
+> source('census_api_key.R')
+> 
+> # Using the previously created census_vars table, find the variable ID for population count.
+> census_vars <- set_tidy_names(census_vars)
+> population_vars <- census_vars %>%
++   filter(grepl('COUNT OF THE POPULATION', Concept))
+> pop_var_id <- population_vars$Name[1]
+> 
+> # Use tidycensus to query the API.
+> county_pop <- get_acs(geography = 'county',
++                       variables = pop_var_id,
++                       state = 'MD',
++                       year = 2018,
++                       geometry = TRUE)
+> 
+> # Map of counties by population
+> ggplot(county_pop) + 
++   geom_sf(aes(fill = estimate), color = NA) + 
++   coord_sf() + 
++   theme_minimal() + 
++   scale_fill_viridis_c()
+~~~
+{:title="Console" .no-eval .input}
 
-# Map of counties by population
-ggplot(county_pop) + 
-  geom_sf(aes(fill = estimate), color = NA) + 
-  coord_sf() + 
-  theme_minimal() + 
-  scale_fill_viridis_c()
-```
 
 [Return](#exercise-2)
 {:.notes}
@@ -98,47 +106,49 @@ ggplot(county_pop) +
 
 Here is a possible solution getting the protein content from different kinds of cheese.
 
-```{r eval = FALSE}
-library(httr)
-library(DBI) 
-library(RSQLite)
 
-source('datagov_api_key.R')
 
-api <- 'https://api.nal.usda.gov/fdc/v1/'
-path <- 'foods/search'
+~~~r
+> library(httr)
+> library(DBI) 
+> library(RSQLite)
+> 
+> source('datagov_api_key.R')
+> 
+> api <- 'https://api.nal.usda.gov/fdc/v1/'
+> path <- 'foods/search'
+> 
+> query_params <- list('api_key' = Sys.getenv('DATAGOV_KEY'),
++                      'query' = 'cheese',
++                      'pageSize' = 100)
+> 
+> # Create a new database
+> cheese_db <- dbConnect(SQLite(), 'cheese.sqlite') 
+> 
+> for (i in 1:3) {
++   # Advance page and query
++   query_params$pageNumber <- i
++   response <- GET(paste0(api, path), query = query_params) 
++   page <- content(response, as = 'parsed')
++ 
++   # Convert nested list to data frame
++   values <- tibble(food = page$foods) %>%
++     unnest_wider(food) %>%
++     unnest_longer(foodNutrients) %>%
++     unnest_wider(foodNutrients) %>%
++     filter(grepl('Protein', nutrientName)) %>%
++     select(fdcId, description, value) %>%
++     setNames(c('foodID', 'name', 'protein'))
++   
++   # Stash in database
++   dbWriteTable(cheese_db, name = 'Food', value = values, append = TRUE)
++   
++ }
+> 
+> dbDisconnect(cheese_db)
+~~~
+{:title="Console" .no-eval .input}
 
-query_params <- list('api_key' = Sys.getenv('DATAGOV_KEY'),
-                     'query' = 'cheese',
-                     'pageSize' = 100)
-
-# Create a new database
-cheese_db <- dbConnect(SQLite(), 'cheese.sqlite') 
-
-for (i in 1:3) {
-  # Advance page and query
-  query_params$pageNumber <- i
-  response <- GET(paste0(api, path), query = query_params) 
-  page <- content(response, as = 'parsed')
-
-  # Convert nested list to data frame
-  values <- tibble(food = page$foods) %>%
-    unnest_wider(food) %>%
-    unnest_longer(foodNutrients) %>%
-    unnest_wider(foodNutrients) %>%
-    filter(grepl('Protein', nutrientName)) %>%
-    select(fdcId, description, value) %>%
-    setNames(c('foodID', 'name', 'protein'))
-  
-  # Stash in database
-  dbWriteTable(cheese_db, name = 'Food', value = values, append = TRUE)
-  
-}
-
-dbDisconnect(cheese_db)
-```
 
 [Return](#exercise-3)
 {:.notes}
-
-===

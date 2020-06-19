@@ -80,7 +80,7 @@ response
 
 ~~~
 Response [https://api.census.gov/data/2018/acs/acs5?get=NAME%2CB19013_001E&for=county%3A%2A&in=state%3A24]
-  Date: 2020-06-19 15:32
+  Date: 2020-06-19 20:56
   Status: 200
   Content-Type: application/json;charset=utf-8
   Size: 1.25 kB
