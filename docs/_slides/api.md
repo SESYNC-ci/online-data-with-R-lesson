@@ -169,10 +169,9 @@ head(county_income)
 {:.output}
 
 
-The data frame extracted here does not recognize that the first
+Notice that the data frame extracted here does not recognize that the first
 row is a header, resulting in all columns being classified as 
 character. This is a typical situation when parsing Web content. 
-You can try to fix this problem as an optional exercise.
 {:.notes}
 
 ===
