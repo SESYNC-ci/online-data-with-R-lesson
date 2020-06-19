@@ -13,12 +13,12 @@
 
 - Programatically acquire data embedded in a web page
 - Request data through a REST API
-- Use the [censusapi](){:.rlib} package to acquire data
+- Use the [tidycensus](){:.rlib} package to acquire data
 - Use SQLite for caching
 
 ===
 
-## Why script data acquistion?
+## Why script data acquisition?
 
 - Too time intensive to acquire manually
 - Integrate updated or new data

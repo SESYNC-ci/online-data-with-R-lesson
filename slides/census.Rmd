@@ -17,7 +17,7 @@ The [tidycensus](){:.rlib} package, developed by Kyle Walker,
 streamlines access to the API and is integrated with [tidyverse](){:.rlib} packages.
 
 To repeat the exercise below at home, request an API key at
-https://api.census.gov/data/key_signup.html, and store it in a file named `census_api_key.R`
+<https://api.census.gov/data/key_signup.html>, and store it in a file named `census_api_key.R`
 in your working directory. The file should contain the line 
 `Sys.setenv(CENSUS_API_KEY = 'your many digit key')`. This creates a hidden
 environment variable containing the key.
@@ -31,7 +31,7 @@ source('census_api_key.R')
 
 ===
 
-Compared to using the API directly via the [requests](){:.pylib} package:
+Compared to using the API directly via the [httr](){:.rlib} package:
 
 **Pros**
 - More concise code, quicker development
@@ -44,14 +44,8 @@ Compared to using the API directly via the [requests](){:.pylib} package:
 
 ===
 
-Query the Census ACS5 survey (American Community Survey) for the variable `B19001_001E` (median annual household income,
+Query the Census ACS5 survey for the variable `B19013_001E` (median annual household income,
 in dollars) and each entity's `NAME`.
-
-The American Community Survey (ACS) is a yearly survey that provides detailed population
-and housing information at fine geographic scale across the United States. Much of the 
-[tidycensus](){:.rlib} package is dedicated to accessing the ACS data. ACS5 refers to a five-year
-average of the annual surveys.
-{:.notes}
 
 ```{r, handout = 0}
 variables <- c('NAME', 'B19013_001E')
@@ -59,8 +53,8 @@ variables <- c('NAME', 'B19013_001E')
 
 ===
 
-This code pulls the variables `NAME` and `B19001_001E` from all counties
-in Maryland. The [tidycensus](){:.rlib} package 
+Get the variables `NAME` and `B19013_001E` (median household income) 
+from all counties in Maryland. [tidycensus](){:.rlib}
 converts the JSON string into a data frame. (No need to check headers.) 
 
 ```{r, handout = 0, message = FALSE, results = 'hide'}

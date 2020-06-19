@@ -142,16 +142,17 @@ of `foods` and view its description.
 
 ===
 
-Use the `purrr` list manipulation package to view the first ten 
-nutrients in the food item and their amounts.
+The `map_dfr` function from the [purrr](){:.rlib} package extracts the name and
+value of all the nutrients in the `foodNutrients` list within the first search
+result, and creates a data frame.
 
 
 
 ~~~r
-map_dfr(fruit$foodNutrients, 
-        ~ data.frame(name = .$nutrientName, 
-                     value = .$value)) %>%
-  head(10)
+nutrients <- map_dfr(fruit$foodNutrients, 
+                     ~ data.frame(name = .$nutrientName, 
+                                  value = .$value))
+head(nutrients, 10)
 ~~~
 {:title="{{ site.data.lesson.handouts[0] }}" .text-document}
 
@@ -204,22 +205,31 @@ query_params$pageSize <- 100
 
 ===
 
+We will send 10 queries to the API to get 1000 total records.
 In each request (each iteration through the loop), 
 advance the query parameter `pageNumber` by one. 
-The first record retrieved will be `pageNumber * pageSize`. 
+The query will retrieve 100 records, starting with `pageNumber * pageSize`. 
+
 
 We use some `tidyr` and `dplyr` manipulations to
 extract the ID number, name, and the amount of sugar from each
-of the foods in the page of results returned by the query. 
+of the foods in the page of results returned by the query. The series of 
+`unnest_longer()` and `unnest_wider()` functions turns the nested list into 
+a data frame by successively converting lists into columns in the data frame.
 This long manipulation is necessary because R does not easily handle the
 nested list structures that APIs return. If we were using
 a specialized API R package, typically it would handle this data wrangling 
-for us.
+for us. After converting the list to a data frame, we use `filter` to retain
+only the rows where the `nutrientName` contains the substring `'Sugars, total'`
+and then select the three columns we want to keep: the numerical ID of 
+the food, its full name, and its sugar content. Finally the 100-row data
+frame is assigned to the object `values`.
 {:.notes}
 
 ===
 
-Insert the fruits (the three-column data frame `values`) 
+Each time through the loop, insert the next 100 fruits 
+(the three-column data frame `values`) 
 in bulk to the database with `dbWriteTable()`.
 
 
@@ -253,7 +263,8 @@ for (i in 1:10) {
 ===
 
 View the records in the database by reading
-everything we have so far into a data frame.
+everything we have so far into a data frame
+with `dbReadTable()`.
 
 
 

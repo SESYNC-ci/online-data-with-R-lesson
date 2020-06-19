@@ -25,9 +25,18 @@ help ensure that the Web service works well with any computer system it
 may interact with.
 {:.notes}
 
+The following code acquires data from the US Census Bureau's American Community Survey (ACS).
+The ACS is a yearly survey that provides detailed population
+and housing information at fine geographic scale across the United States. 
+ACS5 refers to a five-year average of the annual surveys.
+{:.notes}
+
 ===
 
-Inspect [this URL](https://api.census.gov/data/2015/acs5?get=NAME&for=county&in=state:24#irrelephant){:target="_blank"} in your browser.
+Inspect [this URL](https://api.census.gov/data/2018/acs5?get=NAME&for=county:*&in=state:24#irrelephant){:target="_blank"} in your browser. 
+
+The URL is a query to the US Census API. The parameters after the `?`
+request the variable `NAME` for all counties in state `24` (Maryland).
 
 In a web service, the already universal system for
 transferring data over the internet, known as HTTP, is half of the
@@ -41,14 +50,14 @@ the URL in a standards-compliant way that the service will recognize.
 |---+---|
 | `https://`        | **scheme** |
 | `api.census.gov`  | **authority**, or simply domain if there's no user authentication |
-| `/data/2015/acs5` | **path** to a resource within a hierarchy |
+| `/data/2018/acs5` | **path** to a resource within a hierarchy |
 |---+---|
 | `?`          | beginning of the **query** component of a URL |
 | `get=NAME`   | first query parameter |
 | `&`          | query parameter separator |
-| `for=county` | second query parameter |
+| `for=county:*` | second query parameter |
 | `&`          | query parameter separator |
-| `in=state:*` | third query parameter |
+| `in=state:24` | third query parameter |
 |---+---|
 | `#`          | beginning of the **fragment** component of a URL |
 | `irrelephant` | a document section, it isn't even sent to the server |
@@ -58,9 +67,9 @@ the URL in a standards-compliant way that the service will recognize.
 
 
 ~~~r
-path <- 'https://api.census.gov/data/2017/acs/acs5'
+path <- 'https://api.census.gov/data/2018/acs/acs5'
 query_params <- list('get' = 'NAME,B19013_001E', 
-                     'for' = 'tract:*',
+                     'for' = 'county:*',
                      'in' = 'state:24')
 
 response = GET(path, query = query_params)
@@ -70,21 +79,21 @@ response
 
 
 ~~~
-Response [https://api.census.gov/data/2017/acs/acs5?get=NAME%2CB19013_001E&for=tract%3A%2A&in=state%3A24]
-  Date: 2020-06-18 01:38
+Response [https://api.census.gov/data/2018/acs/acs5?get=NAME%2CB19013_001E&for=county%3A%2A&in=state%3A24]
+  Date: 2020-06-19 15:32
   Status: 200
   Content-Type: application/json;charset=utf-8
-  Size: 115 kB
-[["NAME","B19013_001E","state","county","tract"],
-["Census Tract 105.01, Wicomico County, Maryland","68652","24","045","010501"],
-["Census Tract 5010.02, Carroll County, Maryland","75069","24","013","501002"],
-["Census Tract 5077.04, Carroll County, Maryland","88306","24","013","507704"],
-["Census Tract 5061.02, Carroll County, Maryland","84810","24","013","506102"],
-["Census Tract 5061.01, Carroll County, Maryland","95075","24","013","506101"],
-["Census Tract 5052.06, Carroll County, Maryland","91908","24","013","505206"],
-["Census Tract 5052.08, Carroll County, Maryland","106116","24","013","505208"],
-["Census Tract 5081.02, Carroll County, Maryland","76083","24","013","508102"],
-["Census Tract 5081.01, Carroll County, Maryland","84821","24","013","508101"],
+  Size: 1.25 kB
+[["NAME","B19013_001E","state","county"],
+["Worcester County, Maryland","61145","24","047"],
+["Baltimore city, Maryland","48840","24","510"],
+["Talbot County, Maryland","67204","24","041"],
+["Harford County, Maryland","85942","24","025"],
+["Howard County, Maryland","117730","24","027"],
+["Anne Arundel County, Maryland","97810","24","003"],
+["Baltimore County, Maryland","74127","24","005"],
+["Calvert County, Maryland","104301","24","009"],
+["Garrett County, Maryland","49619","24","023"],
 ...
 ~~~
 {:.output}
@@ -139,30 +148,23 @@ the JSON content of the response as a character vector, then
 
 ~~~r
 library(jsonlite)
-maryland_income <- response %>%
+county_income <- response %>%
   content(as = 'text') %>%
   fromJSON()
 
-head(maryland_income)
+head(county_income)
 ~~~
 {:title="{{ site.data.lesson.handouts[0] }}" .text-document}
 
 
 ~~~
-     [,1]                                             [,2]          [,3]   
-[1,] "NAME"                                           "B19013_001E" "state"
-[2,] "Census Tract 105.01, Wicomico County, Maryland" "68652"       "24"   
-[3,] "Census Tract 5010.02, Carroll County, Maryland" "75069"       "24"   
-[4,] "Census Tract 5077.04, Carroll County, Maryland" "88306"       "24"   
-[5,] "Census Tract 5061.02, Carroll County, Maryland" "84810"       "24"   
-[6,] "Census Tract 5061.01, Carroll County, Maryland" "95075"       "24"   
-     [,4]     [,5]    
-[1,] "county" "tract" 
-[2,] "045"    "010501"
-[3,] "013"    "501002"
-[4,] "013"    "507704"
-[5,] "013"    "506102"
-[6,] "013"    "506101"
+     [,1]                         [,2]          [,3]    [,4]    
+[1,] "NAME"                       "B19013_001E" "state" "county"
+[2,] "Worcester County, Maryland" "61145"       "24"    "047"   
+[3,] "Baltimore city, Maryland"   "48840"       "24"    "510"   
+[4,] "Talbot County, Maryland"    "67204"       "24"    "041"   
+[5,] "Harford County, Maryland"   "85942"       "24"    "025"   
+[6,] "Howard County, Maryland"    "117730"      "24"    "027"   
 ~~~
 {:.output}
 

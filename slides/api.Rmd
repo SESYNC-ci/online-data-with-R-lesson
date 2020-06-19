@@ -25,9 +25,18 @@ help ensure that the Web service works well with any computer system it
 may interact with.
 {:.notes}
 
+The following code acquires data from the US Census Bureau's American Community Survey (ACS).
+The ACS is a yearly survey that provides detailed population
+and housing information at fine geographic scale across the United States. 
+ACS5 refers to a five-year average of the annual surveys.
+{:.notes}
+
 ===
 
-Inspect [this URL](https://api.census.gov/data/2015/acs5?get=NAME&for=county&in=state:24#irrelephant){:target="_blank"} in your browser.
+Inspect [this URL](https://api.census.gov/data/2018/acs5?get=NAME&for=county:*&in=state:24#irrelephant){:target="_blank"} in your browser. 
+
+The URL is a query to the US Census API. The parameters after the `?`
+request the variable `NAME` for all counties in state `24` (Maryland).
 
 In a web service, the already universal system for
 transferring data over the internet, known as HTTP, is half of the
@@ -41,14 +50,14 @@ the URL in a standards-compliant way that the service will recognize.
 |---+---|
 | `https://`        | **scheme** |
 | `api.census.gov`  | **authority**, or simply domain if there's no user authentication |
-| `/data/2015/acs5` | **path** to a resource within a hierarchy |
+| `/data/2018/acs5` | **path** to a resource within a hierarchy |
 |---+---|
 | `?`          | beginning of the **query** component of a URL |
 | `get=NAME`   | first query parameter |
 | `&`          | query parameter separator |
-| `for=county` | second query parameter |
+| `for=county:*` | second query parameter |
 | `&`          | query parameter separator |
-| `in=state:*` | third query parameter |
+| `in=state:24` | third query parameter |
 |---+---|
 | `#`          | beginning of the **fragment** component of a URL |
 | `irrelephant` | a document section, it isn't even sent to the server |
@@ -56,9 +65,9 @@ the URL in a standards-compliant way that the service will recognize.
 ===
 
 ```{r, handout = 0}
-path <- 'https://api.census.gov/data/2017/acs/acs5'
+path <- 'https://api.census.gov/data/2018/acs/acs5'
 query_params <- list('get' = 'NAME,B19013_001E', 
-                     'for' = 'tract:*',
+                     'for' = 'county:*',
                      'in' = 'state:24')
 
 response = GET(path, query = query_params)
@@ -101,11 +110,11 @@ the JSON content of the response as a character vector, then
 
 ```{r, handout = 0, message = FALSE}
 library(jsonlite)
-maryland_income <- response %>%
+county_income <- response %>%
   content(as = 'text') %>%
   fromJSON()
 
-head(maryland_income)
+head(county_income)
 ```
 
 The data frame extracted here does not recognize that the first

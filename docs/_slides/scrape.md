@@ -1,65 +1,63 @@
 ---
 ---
 
-## Requests
+## Web Scraping
 
 That "http" at the beginning of the URL for a possible data source is
 a protocol---an understanding between a client and a server about how
-to communicate. The client does not have to be a web browser, so long
-as it knows the protocol. After all, [servers exist to
-serve](https://xkcd.com/869/).
+to communicate. The client could either be a web browser or your web
+scraping program written in R, as long as it uses the correct protocol. 
+After all, [servers exist to serve](https://xkcd.com/869/).
 
 ===
 
-The [httr](){:.rlib} package provides a simple interface to
-issuing HTTP requests and handling the response. Here's an example
-using an [XKCD comic](https://xkcd.com/869/).
+The following example
+uses the [httr](){:.rlib} package to issue a HTTP request and handle the
+response. 
+
+The page we are scraping, <http://research.jisao.washington.edu/pdo/PDO.latest>,
+deals with the [Pacific Decadal Oscillation](https://en.wikipedia.org/wiki/Pacific_decadal_oscillation) 
+(PDO), a periodic switching between
+warm and cool water temperatures in the northern Pacific Ocean. Specifically, it
+contains monthly values from 1900-2018 indicating how far above or below normal the sea surface
+temperature across the northern Pacific Ocean was during that month.
+{:.notes}
 
 
 
 ~~~r
 library(httr)
 
-response <- GET('https://xkcd.com/869')
+response <- GET('http://research.jisao.washington.edu/pdo/PDO.latest')
 response
 ~~~
 {:title="{{ site.data.lesson.handouts[0] }}" .text-document}
 
 
 ~~~
-Response [https://xkcd.com/869/]
-  Date: 2020-06-18 01:29
+Response [http://research.jisao.washington.edu/pdo/PDO.latest]
+  Date: 2020-06-19 15:19
   Status: 200
-  Content-Type: text/html; charset=UTF-8
-  Size: 7.54 kB
-<!DOCTYPE html>
-<html>
-<head>
-<link rel="stylesheet" type="text/css" href="/s/7d94e0.css" title="Default"/>
-<title>xkcd: Server Attention Span</title>
-<meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-<link rel="shortcut icon" href="/s/919f27.ico" type="image/x-icon"/>
-<link rel="icon" href="/s/919f27.ico" type="image/x-icon"/>
-<link rel="alternate" type="application/atom+xml" title="Atom 1.0" href="/ato...
-<link rel="alternate" type="application/rss+xml" title="RSS 2.0" href="/rss.x...
-...
+  Content-Type: <unknown>
+  Size: 12.3 kB
+<BINARY BODY>
 ~~~
 {:.output}
 
 
 ===
 
-The response is still binary. It takes a browser-like parser to
-translate the raw content into an HTML document. 
-[rvest](){:.rlib} does the translating. 
+The response is binary (0s and 1s). The [rvest](){:.rlib} package translates
+the raw content into an HTML document, just like a browser does. We use the 
+`read_html` function to do this.
 
 
 
 ~~~r
 library(rvest) 
 
-doc <- read_html(response)
-doc
+pdo_doc <- read_html(response)
+pdo_doc
 ~~~
 {:title="{{ site.data.lesson.handouts[0] }}" .text-document}
 
@@ -67,81 +65,66 @@ doc
 ~~~
 {html_document}
 <html>
-[1] <head>\n<meta http-equiv="Content-Type" content="text/html; charset=UTF-8 ...
-[2] <body>\n<div id="topContainer">\n<div id="topLeft">\n<ul>\n<li><a href="/ ...
+[1] <body><p>PDO INDEX\n\nIf the columns of the table appear without formatti ...
 ~~~
 {:.output}
 
 
 ===
 
-[htmltidy](){:.rlib}
-displays an easier-to-read version with indentations 
-and line breaks in your Viewer pane.
+If you look at the HTML document, you can see that all the data is inside an 
+element called `"p"`. We use the `html_node` function to extract the 
+single `"p"` element from the HTML document, then the `html_text` function
+to extract the text from that element.
 
 
 
 ~~~r
-> library(htmltidy)
-> html_view(doc)
+pdo_node <- html_node(pdo_doc, "p")
+pdo_text <- html_text(pdo_node)
 ~~~
-{:title="Console" .no-eval .input}
-
-
-![screenshot of html view]({% include asset.html path = 'images/html_view_screenshot.PNG' %}){:.small-image}
-
-===
-
-Searching the document for desired content is the hard part. This search
-uses a CSS query to find the image below a section of the document with
-attribute `id = comic`.
-
-
-
-~~~r
-> img <- doc %>%
-+   html_nodes('#comic > img') 
-> img
-~~~
-{:title="Console" .input}
-
-
-~~~
-{xml_nodeset (1)}
-[1] <img src="//imgs.xkcd.com/comics/server_attention_span.png" title="They h ...
-~~~
-{:.output}
+{:title="{{ site.data.lesson.handouts[0] }}" .text-document}
 
 
 ===
 
-It is possible to query by CSS for a single element and extract
-attributes such as the image title.
+Now we have a long text string containing all the data. We can use text mining tools
+like regular expressions to pull out data. If we want the twelve monthly
+values for the year 2017, we can use the [stringr](){:.rlib} package to get 
+all the text between the strings "2017" and "2018" with `str_match`.
 
 
 
 ~~~r
-img <- doc %>%
-  html_node('#comic > img') 
+library(stringr)
+pdo_text_2017 <- str_match(pdo_text, "(?<=2017).*.(?=\\n2018)")
+~~~
+{:title="{{ site.data.lesson.handouts[0] }}" .text-document}
 
-img_attrs <- img %>%
-  html_attrs()
 
-img_attrs['title']
+===
+
+Then extract all the numeric values in the substring with `str_extract_all`.
+
+
+
+~~~r
+str_extract_all(pdo_text_2017[1], "[0-9-.]+")
 ~~~
 {:title="{{ site.data.lesson.handouts[0] }}" .text-document}
 
 
 ~~~
-                                                                                                                                                                                                                                          title 
-"They have to keep the adjacent rack units empty. Otherwise, half the entries in their /var/log/syslog are just 'SERVER BELOW TRYING TO START CONVERSATION *AGAIN*.' and 'WISH THEY'D STOP GIVING HIM SO MUCH COFFEE IT SPLATTERS EVERYWHERE.'" 
+[[1]]
+ [1] "0.77" "0.70" "0.74" "1.12" "0.88" "0.79" "0.10" "0.09" "0.32" "0.05"
+[11] "0.15" "0.50"
 ~~~
 {:.output}
 
 
 ===
 
-## Was that so bad?
+## Manual web scraping is hard!
 
 Pages designed for humans are increasingly harder to parse programmatically.
 
@@ -161,9 +144,9 @@ The US Census provides some documentation for their data services in a massive t
 
 ===
 
-Set `fill = TRUE` when you convert the html table into an R 
-data frame, so that inconsistent numbers of columns in each row
-are filled in.
+`html_table()` converts the html table into an R 
+data frame. Set `fill = TRUE` so that inconsistent numbers 
+of columns in each row are filled in.
 
 
 

@@ -2,22 +2,19 @@
 
 library(...)
 
-response <- ...('https://xkcd.com/869')
+response <- ...('http://research.jisao.washington.edu/pdo/PDO.latest')
 response
 
 library(rvest) 
-library(htmltidy)
 
-doc <- read_html(...)
-html_view(...)
+pdo_doc <- read_html(...)
 
-img <- doc %>%
-  html_node(...) 
+pdo_node <- html_node(..., "p")
+pdo_text <- ...(pdo_node)
 
-img_attrs <- img %>%
-  html_attrs()
+pdo_text_2017 <- str_match(pdo_text, "(?<=2017).*.(?=\\n2018)")
 
-img_attrs[...]
+str_extract_all(pdo_text_2017[1], "[0-9-.]+")
 
 ## HTML Tables
 
@@ -51,33 +48,31 @@ response$...['content-type']
 
 library(...)
 
-maryland_income <- ... %>%
+county_income <- ... %>%
   ...(as = 'text') %>%
   ...()
 
-head(maryland_income)
+head(county_income)
 
 ## Specialized Packages
 
-library(censusapi)
+library(tidycensus)
 source(...)
 
 variables <- c('NAME', 'B19013_001E')
 
-tract_income <- getCensus(name = 'acs/acs5', 
-                          vintage = 2017, 
-                          vars = ..., 
-                          region = 'tract:*', 
-                          regionin = 'state:24+county:*')
+county_income <- get_acs(geography = 'county',
+                         variables = ...,
+                         state = ...,
+                         year = 2018,
+                         geometry = TRUE)
+head(county_income)
 
-head(tract_income)
-
-tract_income <- tract_income %>%
-  rename(household_income = B19013_001E) %>%
-  ...(... > 0) 
-
-ggplot(tract_income, aes(x = county, y = ...)) +
-  geom_boxplot()
+ggplot(...) + 
+  geom_sf(aes(fill = ...), color = NA) + 
+  coord_sf() + 
+  theme_minimal() + 
+  scale_fill_viridis_c()
 
 ## Paging & Stashing
 
@@ -90,10 +85,10 @@ query_params <- list('api_key' = Sys.getenv('DATAGOV_KEY'),
 doc <- GET(paste0(..., ...), query = query_params) %>%
   ...(as = 'parsed')
 
-map_dfr(fruit$foodNutrients, 
-        ~ data.frame(name = .$nutrientName, 
-                     value = .$value)) %>%
-  head(10)
+nutrients <- map_dfr(fruit$foodNutrients, 
+                     ~ data.frame(name = .$nutrientName, 
+                                  value = .$value))
+head(nutrients, 10)
 
 library(DBI) 
 library(RSQLite)
