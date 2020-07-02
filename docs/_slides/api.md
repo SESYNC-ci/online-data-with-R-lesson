@@ -33,7 +33,7 @@ ACS5 refers to a five-year average of the annual surveys.
 
 ===
 
-Inspect [this URL](https://api.census.gov/data/2018/acs5?get=NAME&for=county:*&in=state:24#irrelephant){:target="_blank"} in your browser. 
+Look carefully at [this URL](https://api.census.gov/data/2018/acs5?get=NAME&for=county:*&in=state:24#irrelephant){:target="_blank"}. 
 
 The URL is a query to the US Census API. The parameters after the `?`
 request the variable `NAME` for all counties in state `24` (Maryland).
@@ -64,6 +64,15 @@ the URL in a standards-compliant way that the service will recognize.
 
 ===
 
+To construct the URL in R and send the query to the API, use `GET()` from 
+[httr](){:.rlib}. 
+
+The first argument to `GET()` is the base URL, and the 
+`query` argument is a named list that can use to pass 
+the parameters of the query to the API. All the elements
+of the list should be character strings.
+{:.notes}
+
 
 
 ~~~r
@@ -80,7 +89,7 @@ response
 
 ~~~
 Response [https://api.census.gov/data/2018/acs/acs5?get=NAME%2CB19013_001E&for=county%3A%2A&in=state%3A24]
-  Date: 2020-06-19 20:56
+  Date: 2020-07-02 19:31
   Status: 200
   Content-Type: application/json;charset=utf-8
   Size: 1.25 kB
@@ -141,8 +150,9 @@ $`content-type`
 ## Response Content
 
 First, use `httr::content()` to retrieve
-the JSON content of the response as a character vector, then
-`jsonlite::fromJSON()` to convert it to a data frame.
+the JSON content of the response. Use `as = 'text'` to
+get the content as a character vector. Then use
+`jsonlite::fromJSON()` to convert to tabular format.
 
 
 
@@ -169,9 +179,9 @@ head(county_income)
 {:.output}
 
 
-Notice that the data frame extracted here does not recognize that the first
+Notice that the matrix created by `fromJSON()` does not recognize that the first
 row is a header, resulting in all columns being classified as 
-character. This is a typical situation when parsing Web content. 
+character. This is a typical situation when parsing Web content, and would require
 {:.notes}
 
 ===

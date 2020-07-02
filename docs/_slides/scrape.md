@@ -12,8 +12,8 @@ After all, [servers exist to serve](https://xkcd.com/869/).
 ===
 
 The following example
-uses the [httr](){:.rlib} package to issue a HTTP request and handle the
-response. 
+uses the [httr](){:.rlib} and [rvest](){:.rlib} packages to issue a 
+HTTP request and handle the response. 
 
 The page we are scraping, <http://research.jisao.washington.edu/pdo/PDO.latest>,
 deals with the [Pacific Decadal Oscillation](https://en.wikipedia.org/wiki/Pacific_decadal_oscillation) 
@@ -36,7 +36,7 @@ response
 
 ~~~
 Response [http://research.jisao.washington.edu/pdo/PDO.latest]
-  Date: 2020-06-19 20:46
+  Date: 2020-07-02 19:22
   Status: 200
   Content-Type: <unknown>
   Size: 12.3 kB
@@ -121,6 +121,10 @@ str_extract_all(pdo_text_2017[1], "[0-9-.]+")
 ~~~
 {:.output}
 
+
+You can learn more about how to use regular expressions to extract information
+from text strings in [SESYNC's text mining lesson](https://cyberhelp.sesync.org/text-mining-lesson/).
+{:.notes}
 
 ===
 

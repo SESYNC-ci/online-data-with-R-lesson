@@ -20,7 +20,8 @@ To repeat the exercise below at home, request an API key at
 <https://api.census.gov/data/key_signup.html>, and store it in a file named `census_api_key.R`
 in your working directory. The file should contain the line 
 `Sys.setenv(CENSUS_API_KEY = 'your many digit key')`. This creates a hidden
-environment variable containing the key.
+system variable containing the key. This is good practice---it is much safer than
+pasting the API key directly into your code or saving it as a variable in the global environment.
 {:.notes}
 
 
@@ -57,6 +58,15 @@ Get the variables `NAME` and `B19013_001E` (median household income)
 from all counties in Maryland. [tidycensus](){:.rlib}
 converts the JSON string into a data frame. (No need to check headers.) 
 
+This code uses the `get_acs` function, which is the main function in 
+[tidycensus](){:.rlib} for interacting with the American Community Survey 
+API. The arguments are fairly self-explanatory. We can use the text 
+abbreviation for the state of Maryland (`MD`); the function automatically
+converts this into the numerical FIPS code. The `geometry = TRUE` argument
+means that we want `get_acs` output to include the county boundaries as a
+spatial object.
+{:.notes}
+
 ```{r, handout = 0, message = FALSE, results = 'hide'}
 county_income <- get_acs(geography = 'county',
                          variables = variables,
@@ -75,6 +85,11 @@ We can use [dplyr](){:.rlib} to manipulate the output, and [ggplot2](){:.rlib} t
 Because we set `geometry = TRUE`, [tidycensus](){:.rlib} even includes spatial information in its
 output that we can use to create maps!
 
+This code uses the spatial data frame output from `get_acs` to plot the counties of Maryland with
+fill color corresponding to the median household income of the counties, with some additional
+graphical options.
+{:.notes}
+
 ```{r, handout = 0}
 ggplot(county_income) + 
   geom_sf(aes(fill = estimate), color = NA) + 
@@ -83,3 +98,6 @@ ggplot(county_income) +
   scale_fill_viridis_c()
 ```
 
+For a more in-depth tutorial on R's geospatial data types, check out 
+[SESYNC's lesson on geospatial packages in R](https://cyberhelp.sesync.org/geospatial-packages-in-R-lesson).
+{:.notes}

@@ -31,7 +31,7 @@ in your working directory. The file should contain the line
 
 ===
 
-Load the `DATAGOV_KEY` variable as an environment variable by importing it from the file you saved it in.
+Load the `DATAGOV_KEY` variable as a system variable by importing it from the file you saved it in.
 
 
 
@@ -44,6 +44,13 @@ Load the `DATAGOV_KEY` variable as an environment variable by importing it from 
 ===
 
 Run an API query for all foods with `"fruit"` in their name and parse the content of the response.
+
+Just like we did previously in this lesson, we create a named list 
+of query parameters, including the API key and the
+search string, and pass them to `GET()`. We use the pipe operator `%>%` 
+to pipe the output of `GET()` to `content()`. We use the `as = 'parsed'`
+argument to convert the JSON content to a nested list.
+{:.notes}
 
 
 
@@ -95,14 +102,14 @@ how many foods matched our search term, `"fruit"`.
 
 
 ~~~
-[1] 17833
+[1] 18801
 ~~~
 {:.output}
 
 
 ===
 
-The purported claimed number of results is much larger than the length
+The claimed number of results is much larger than the length
 of the `foods` array contained in this response. The query returned only the
 first page, with 50 items.
 
@@ -193,7 +200,8 @@ fruit_db <- dbConnect(SQLite(), 'fruits.sqlite')
 
 ===
 
-Add a new `pageSize` parameter to request `100` documents per page.
+Add a new `pageSize` parameter by appending a named element
+to the existing `query_params` list, to request `100` documents per page.
 
 
 
