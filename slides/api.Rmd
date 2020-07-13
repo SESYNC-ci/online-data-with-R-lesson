@@ -123,7 +123,11 @@ library(jsonlite)
 county_income <- response %>%
   content(as = 'text') %>%
   fromJSON()
+```
 
+===
+
+```{r}
 head(county_income)
 ```
 

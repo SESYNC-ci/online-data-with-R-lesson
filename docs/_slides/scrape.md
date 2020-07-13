@@ -161,10 +161,16 @@ table_raw <- html_node(census_vars_doc, 'table')
 
 # This line takes a few moments to run.
 census_vars <- html_table(table_raw, fill = TRUE) 
-
-head(census_vars)
 ~~~
 {:title="{{ site.data.lesson.handouts[0] }}" .text-document}
+
+
+
+
+~~~r
+> head(census_vars)
+~~~
+{:title="Console" .input}
 
 
 ~~~

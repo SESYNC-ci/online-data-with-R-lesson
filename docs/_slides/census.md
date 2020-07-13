@@ -29,9 +29,16 @@ pasting the API key directly into your code or saving it as a variable in the gl
 
 ~~~r
 library(tidycensus)
-source('census_api_key.R')
 ~~~
 {:title="{{ site.data.lesson.handouts[0] }}" .text-document}
+
+
+
+
+~~~r
+> source('census_api_key.R')
+~~~
+{:title="Console" .input}
 
 
 ===
@@ -101,6 +108,23 @@ geometry type:  MULTIPOLYGON
 dimension:      XY
 bbox:           xmin: -79.06756 ymin: 38.31653 xmax: -75.70736 ymax: 39.72304
 CRS:            4269
+~~~
+{:.output}
+
+
+~~~
+Warning: `...` is not empty.
+
+We detected these problematic arguments:
+* `needs_dots`
+
+These dots only exist to allow future extensions and should be empty.
+Did you misspecify an argument?
+~~~
+{:.output}
+
+
+~~~
 # A tibble: 6 x 6
   GEOID NAME        variable estimate   moe                             geometry
   <chr> <chr>       <chr>       <dbl> <dbl>                   <MULTIPOLYGON [°]>
@@ -135,7 +159,7 @@ ggplot(county_income) +
   scale_fill_viridis_c()
 ~~~
 {:title="{{ site.data.lesson.handouts[0] }}" .text-document}
-![ ]({% include asset.html path="images/census/unnamed-chunk-5-1.png" %})
+![ ]({% include asset.html path="images/census/unnamed-chunk-6-1.png" %})
 {:.captioned}
 
 For a more in-depth tutorial on R's geospatial data types, check out 

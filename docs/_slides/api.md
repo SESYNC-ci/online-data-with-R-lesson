@@ -161,10 +161,18 @@ library(jsonlite)
 county_income <- response %>%
   content(as = 'text') %>%
   fromJSON()
-
-head(county_income)
 ~~~
 {:title="{{ site.data.lesson.handouts[0] }}" .text-document}
+
+
+===
+
+
+
+~~~r
+> head(county_income)
+~~~
+{:title="Console" .input}
 
 
 ~~~

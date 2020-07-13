@@ -108,6 +108,9 @@ result, and creates a data frame.
 nutrients <- map_dfr(fruit$foodNutrients, 
                      ~ data.frame(name = .$nutrientName, 
                                   value = .$value))
+```
+
+```{r}
 head(nutrients, 10)
 ```
 
@@ -194,6 +197,9 @@ with `dbReadTable()`.
 
 ```{r, handout = 0}
 fruit_sugar_content <- dbReadTable(fruit_db, name = 'Food')
+```
+
+```{r}
 head(fruit_sugar_content, 10)
 ```
 

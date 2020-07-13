@@ -27,6 +27,9 @@ pasting the API key directly into your code or saving it as a variable in the gl
 
 ```{r, handout = 0, message = FALSE}
 library(tidycensus)
+```
+
+```{r}
 source('census_api_key.R')
 ```
 

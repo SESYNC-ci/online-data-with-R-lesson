@@ -112,7 +112,9 @@ table_raw <- html_node(census_vars_doc, 'table')
 
 # This line takes a few moments to run.
 census_vars <- html_table(table_raw, fill = TRUE) 
+```
 
+```{r}
 head(census_vars)
 ```
 

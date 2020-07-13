@@ -159,9 +159,16 @@ result, and creates a data frame.
 nutrients <- map_dfr(fruit$foodNutrients, 
                      ~ data.frame(name = .$nutrientName, 
                                   value = .$value))
-head(nutrients, 10)
 ~~~
 {:title="{{ site.data.lesson.handouts[0] }}" .text-document}
+
+
+
+
+~~~r
+> head(nutrients, 10)
+~~~
+{:title="Console" .input}
 
 
 ~~~
@@ -277,9 +284,16 @@ with `dbReadTable()`.
 
 ~~~r
 fruit_sugar_content <- dbReadTable(fruit_db, name = 'Food')
-head(fruit_sugar_content, 10)
 ~~~
 {:title="{{ site.data.lesson.handouts[0] }}" .text-document}
+
+
+
+
+~~~r
+> head(fruit_sugar_content, 10)
+~~~
+{:title="Console" .input}
 
 
 ~~~
