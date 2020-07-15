@@ -50,7 +50,7 @@ the URL in a standards-compliant way that the service will recognize.
 |---+---|
 | `https://`        | **scheme** |
 | `api.census.gov`  | **authority**, or simply domain if there's no user authentication |
-| `/data/2018/acs5` | **path** to a resource within a hierarchy |
+| `/data/2018/acs/acs5` | **path** to a resource within a hierarchy |
 |---+---|
 | `?`          | beginning of the **query** component of a URL |
 | `get=NAME`   | first query parameter |
@@ -89,7 +89,7 @@ response
 
 ~~~
 Response [https://api.census.gov/data/2018/acs/acs5?get=NAME%2CB19013_001E&for=county%3A%2A&in=state%3A24]
-  Date: 2020-07-02 19:31
+  Date: 2020-07-15 12:31
   Status: 200
   Content-Type: application/json;charset=utf-8
   Size: 1.25 kB

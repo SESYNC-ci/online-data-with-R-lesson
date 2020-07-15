@@ -50,7 +50,7 @@ the URL in a standards-compliant way that the service will recognize.
 |---+---|
 | `https://`        | **scheme** |
 | `api.census.gov`  | **authority**, or simply domain if there's no user authentication |
-| `/data/2018/acs5` | **path** to a resource within a hierarchy |
+| `/data/2018/acs/acs5` | **path** to a resource within a hierarchy |
 |---+---|
 | `?`          | beginning of the **query** component of a URL |
 | `get=NAME`   | first query parameter |

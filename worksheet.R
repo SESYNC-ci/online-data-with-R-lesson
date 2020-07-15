@@ -35,9 +35,9 @@ library(tidyverse)
 
 ## Web Services
 
-path <- 'https://api.census.gov/data/2017/acs/acs5'
+path <- 'https://api.census.gov/data/2018/acs/acs5'
 query_params <- list('get' = 'NAME,...', 
-                     'for' = 'tract:*',
+                     'for' = 'county:*',
                      'in' = 'state:24')
 
 response = GET(..., ... = ...)
