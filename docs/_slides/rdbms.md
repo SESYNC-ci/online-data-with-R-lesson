@@ -102,7 +102,7 @@ how many foods matched our search term, `"fruit"`.
 
 
 ~~~
-[1] 18801
+[1] 18975
 ~~~
 {:.output}
 
@@ -187,6 +187,11 @@ nutrients <- map_dfr(fruit$foodNutrients,
 {:.output}
 
 
+The `map_dfr` function applies a function to each element in `foodNutrients`, which
+returns a single-row data frame with two columns. Then, it combines all 50 of 
+the single-row data frames to create a 50-row data frame and returns it.
+{:.notes}
+
 ===
 
 The `DBI` and `RSQLite` packages together allow R to connect to a 
@@ -225,18 +230,17 @@ In each request (each iteration through the loop),
 advance the query parameter `pageNumber` by one. 
 The query will retrieve 100 records, starting with `pageNumber * pageSize`. 
 
-
 We use some `tidyr` and `dplyr` manipulations to
 extract the ID number, name, and the amount of sugar from each
 of the foods in the page of results returned by the query. The series of 
 `unnest_longer()` and `unnest_wider()` functions turns the nested list into 
 a data frame by successively converting lists into columns in the data frame.
-This long manipulation is necessary because R does not easily handle the
+This manipulation is necessary because R does not easily handle the
 nested list structures that APIs return. If we were using
 a specialized API R package, typically it would handle this data wrangling 
 for us. After converting the list to a data frame, we use `filter` to retain
 only the rows where the `nutrientName` contains the substring `'Sugars, total'`
-and then select the three columns we want to keep: the numerical ID of 
+and then `select` the three columns we want to keep: the numerical ID of 
 the food, its full name, and its sugar content. Finally the 100-row data
 frame is assigned to the object `values`.
 {:.notes}
@@ -273,6 +277,12 @@ for (i in 1:10) {
 ~~~
 {:title="{{ site.data.lesson.handouts[0] }}" .text-document}
 
+
+The first time through the loop, the `Food` table does not exist in
+the database yet, so `dbWriteTable()` creates it. In subsequent iterations,
+the `append = TRUE` argument tells `dbWriteTable()` to add new rows to
+the existing database.
+{:.notes}
 
 ===
 

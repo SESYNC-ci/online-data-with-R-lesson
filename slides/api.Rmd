@@ -68,7 +68,7 @@ To construct the URL in R and send the query to the API, use `GET()` from
 [httr](){:.rlib}. 
 
 The first argument to `GET()` is the base URL, and the 
-`query` argument is a named list that can use to pass 
+`query` argument is a named list that passes 
 the parameters of the query to the API. All the elements
 of the list should be character strings.
 {:.notes}
@@ -79,7 +79,7 @@ query_params <- list('get' = 'NAME,B19013_001E',
                      'for' = 'county:*',
                      'in' = 'state:24')
 
-response = GET(path, query = query_params)
+response <- GET(path, query = query_params)
 response
 ```
 
@@ -90,6 +90,10 @@ response
 The response from the API is a bunch of 0s and 1s, but part of the
 HTTP protocol is to include a "header" with information about how
 to decode the body of the response.
+
+The output of `GET()` has already decoded the body of the response
+from binary format.
+{:.notes}
 
 ===
 
@@ -116,7 +120,7 @@ response$headers['content-type']
 First, use `httr::content()` to retrieve
 the JSON content of the response. Use `as = 'text'` to
 get the content as a character vector. Then use
-`jsonlite::fromJSON()` to convert to tabular format.
+`jsonlite::fromJSON()` to convert to a matrix.
 
 ```{r, handout = 0, message = FALSE}
 library(jsonlite)
@@ -128,12 +132,13 @@ county_income <- response %>%
 ===
 
 ```{r}
-head(county_income)
+county_income
 ```
 
 Notice that the matrix created by `fromJSON()` does not recognize that the first
 row is a header, resulting in all columns being classified as 
 character. This is a typical situation when parsing Web content, and would require
+additional data wrangling to fix.
 {:.notes}
 
 ===

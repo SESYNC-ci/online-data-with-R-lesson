@@ -67,7 +67,7 @@ API. The arguments are fairly self-explanatory. We can use the text
 abbreviation for the state of Maryland (`MD`); the function automatically
 converts this into the numerical FIPS code. The `geometry = TRUE` argument
 means that we want `get_acs` output to include the county boundaries as a
-spatial object.
+spatial object, to easily create maps of our data.
 {:.notes}
 
 ```{r, handout = 0, message = FALSE, results = 'hide'}
@@ -79,7 +79,7 @@ county_income <- get_acs(geography = 'county',
 ```
 
 ```{r}
-head(county_income)
+county_income
 ```
 
 ===

@@ -5,8 +5,9 @@
 
 That "http" at the beginning of the URL for a possible data source is
 a protocol---an understanding between a client and a server about how
-to communicate. The client could either be a web browser or your web
-scraping program written in R, as long as it uses the correct protocol. 
+to communicate. The client could either be a web browser such as 
+Chrome or Firefox, or your web scraping program written in R, 
+as long as it uses the correct protocol. 
 After all, [servers exist to serve](https://xkcd.com/869/).
 
 ===
@@ -36,7 +37,7 @@ response
 
 ~~~
 Response [http://research.jisao.washington.edu/pdo/PDO.latest]
-  Date: 2020-07-15 12:22
+  Date: 2020-08-10 16:06
   Status: 200
   Content-Type: <unknown>
   Size: 12.3 kB
@@ -44,6 +45,10 @@ Response [http://research.jisao.washington.edu/pdo/PDO.latest]
 ~~~
 {:.output}
 
+
+The `GET()` function from [httr](){:.rlib} can be used with a single argument, 
+a text string with the URL of the page you are scraping.
+{:.notes}
 
 ===
 
@@ -70,6 +75,11 @@ pdo_doc
 {:.output}
 
 
+The HTML document returned by `read_html` is no longer 0s and 1s, it now
+contains readable text. However it is stored as a single long character string.
+We need to do some additional processing to make it useful.
+{:.notes}
+
 ===
 
 If you look at the HTML document, you can see that all the data is inside an 
@@ -85,6 +95,11 @@ pdo_text <- html_text(pdo_node)
 ~~~
 {:title="{{ site.data.lesson.handouts[0] }}" .text-document}
 
+
+The first argument of `html_node` is the HTML document, and the second
+argument is the name of the element we want to extract. `html_text` 
+takes the extracted element as input.
+{:.notes}
 
 ===
 
@@ -140,7 +155,7 @@ Pages designed for humans are increasingly harder to parse programmatically.
 
 ## HTML Tables
 
-Sites with easily accessible html tables nowadays may be specifically
+Sites with easily accessible HTML tables nowadays may be specifically
 intended to be parsed programmatically, rather than browsed by a human reader.
 The US Census provides some documentation for their data services in a massive table:
 
@@ -148,7 +163,7 @@ The US Census provides some documentation for their data services in a massive t
 
 ===
 
-`html_table()` converts the html table into an R 
+`html_table()` converts the HTML table into an R 
 data frame. Set `fill = TRUE` so that inconsistent numbers 
 of columns in each row are filled in.
 
@@ -206,7 +221,11 @@ documentation for variables of interest.
 
 The call to `set_tidy_names()` is necessary because the table
 extraction results in some columns with undefined names---a
-common occurrence when parsing Web content.
+common occurrence when parsing Web content. Next, we use `select()`
+to select only the `Name` and `Label` columns, and `filter()`
+to select only the rows where the `Label` column contains the 
+substring `"Median household income"`. The `grepl()` function
+allows us to filter by a regular expression.
 {:.notes}
 
 

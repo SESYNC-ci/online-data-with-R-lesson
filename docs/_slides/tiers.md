@@ -33,5 +33,5 @@ This is not the fastest protocol for moving large datasets, but it is universal
 ## Specialized Package 😂
 
 Major data providers can justify writing a "wrapper" package for their API, 
-specific to yourlanguage of choice (e.g. Python or R), that facilitates accessing the
+specific to your language of choice (e.g. Python or R), that facilitates accessing the
 data they provide through a web service. Sadly, not all do so.

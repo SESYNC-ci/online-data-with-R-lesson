@@ -79,7 +79,7 @@ API. The arguments are fairly self-explanatory. We can use the text
 abbreviation for the state of Maryland (`MD`); the function automatically
 converts this into the numerical FIPS code. The `geometry = TRUE` argument
 means that we want `get_acs` output to include the county boundaries as a
-spatial object.
+spatial object, to easily create maps of our data.
 {:.notes}
 
 
@@ -97,43 +97,31 @@ county_income <- get_acs(geography = 'county',
 
 
 ~~~r
-> head(county_income)
+> county_income
 ~~~
 {:title="Console" .input}
 
 
 ~~~
-Simple feature collection with 6 features and 5 fields
+Simple feature collection with 24 features and 5 fields
 geometry type:  MULTIPOLYGON
 dimension:      XY
-bbox:           xmin: -79.06756 ymin: 38.31653 xmax: -75.70736 ymax: 39.72304
+bbox:           xmin: -79.48765 ymin: 37.91172 xmax: -75.04894 ymax: 39.72304
 CRS:            4269
-~~~
-{:.output}
-
-
-~~~
-Warning: `...` is not empty.
-
-We detected these problematic arguments:
-* `needs_dots`
-
-These dots only exist to allow future extensions and should be empty.
-Did you misspecify an argument?
-~~~
-{:.output}
-
-
-~~~
-# A tibble: 6 x 6
-  GEOID NAME        variable estimate   moe                             geometry
-  <chr> <chr>       <chr>       <dbl> <dbl>                   <MULTIPOLYGON [°]>
-1 24001 Allegany C… B19013_…    44065  1148 (((-79.06756 39.47944, -79.06003 39…
-2 24003 Anne Arund… B19013_…    97810  1299 (((-76.84036 39.10314, -76.83678 39…
-3 24005 Baltimore … B19013_…    74127   922 (((-76.3257 39.31397, -76.32452 39.…
-4 24009 Calvert Co… B19013_…   104301  3548 (((-76.70121 38.71276, -76.69915 38…
-5 24011 Caroline C… B19013_…    54956  2419 (((-76.01505 38.72869, -76.01321 38…
-6 24013 Carroll Co… B19013_…    93363  1867 (((-77.31151 39.63914, -77.30972 39…
+# A tibble: 24 x 6
+   GEOID NAME       variable  estimate   moe                            geometry
+   <chr> <chr>      <chr>        <dbl> <dbl>                  <MULTIPOLYGON [°]>
+ 1 24001 Allegany … B19013_0…    44065  1148 (((-79.06756 39.47944, -79.06003 3…
+ 2 24003 Anne Arun… B19013_0…    97810  1299 (((-76.84036 39.10314, -76.83678 3…
+ 3 24005 Baltimore… B19013_0…    74127   922 (((-76.3257 39.31397, -76.32452 39…
+ 4 24009 Calvert C… B19013_0…   104301  3548 (((-76.70121 38.71276, -76.69915 3…
+ 5 24011 Caroline … B19013_0…    54956  2419 (((-76.01505 38.72869, -76.01321 3…
+ 6 24013 Carroll C… B19013_0…    93363  1867 (((-77.31151 39.63914, -77.30972 3…
+ 7 24015 Cecil Cou… B19013_0…    72845  2208 (((-76.23326 39.72131, -76.15435 3…
+ 8 24017 Charles C… B19013_0…    95924  2651 (((-77.27382 38.48356, -77.2724 38…
+ 9 24019 Dorcheste… B19013_0…    52145  4243 (((-76.06544 38.1298, -76.06461 38…
+10 24021 Frederick… B19013_0…    91999  1580 (((-77.67716 39.32453, -77.67637 3…
+# … with 14 more rows
 ~~~
 {:.output}
 
