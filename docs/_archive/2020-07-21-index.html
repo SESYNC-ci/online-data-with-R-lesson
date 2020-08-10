@@ -1,0 +1,1098 @@
+---
+---
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Online Data with R</title>
+<meta name="description" content="Acquire data from websites and APIs using R">
+<link rel="canonical"
+      href="https://SESYNC-ci.github.io/online-data-with-R-lesson/2020/07/21/index.html">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/SESYNC-ci/lesson-style@3.0/docs/assets/css/default.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/SESYNC-ci/lesson-style@3.0/docs/assets/css/syntax.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/SESYNC-ci/lesson-style@3.0/docs/assets/css/static.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML"></script>
+<link href="https://use.fontawesome.com/releases/v5.5.0/css/all.css"
+      rel="stylesheet"
+      integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU"
+      crossorigin="anonymous">
+
+    
+    <script src="https://cdn.jsdelivr.net/gh/SESYNC-ci/lesson-style@3.0/docs/assets/htmlwidgets/www/htmlwidgets.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/SESYNC-ci/lesson-style@3.0/docs/assets/htmlwidgets/lib/highlightjs/highlight.pack.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/SESYNC-ci/lesson-style@3.0/docs/assets/htmlwidgets/lib/vkbeautify/vkbeautify.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/SESYNC-ci/lesson-style@3.0/docs/assets/htmlwidgets/lib/vkbeautify/wdgt.css">
+    <script src="https://cdn.jsdelivr.net/gh/SESYNC-ci/lesson-style@3.0/docs/assets/htmlwidgets/xmlview.js"></script>
+  </head>
+  <body>
+    <div class="page-content">
+      <div class="wrapper">
+        
+
+<h1 style="text-transform: none;" id="online-data-with-r">Online Data with R</h1>
+
+<p>Lesson 6 with <em>Quentin Read</em></p>
+
+<nav id="ToC">
+
+  <ul>
+    <li><a href="#/slides/intro">Lesson Objectives</a></li>
+    <li><a href="#/slides/tiers">Acquiring Online Data</a></li>
+    <li><a href="#/slides/scrape">Web Scraping</a></li>
+    <li><a href="#/slides/api">Web Services</a></li>
+    <li><a href="#/slides/census">Specialized Packages</a></li>
+    <li><a href="#/slides/rdbms">Paging &amp; Stashing</a></li>
+    <li><a href="#/slides/conclude">Takeaway</a></li>
+    <li><a href="#/slides/exercise">Exercises</a></li>
+  </ul>
+</nav>
+
+<hr />
+<p><a name="/slides/intro"></a></p>
+
+<h2 id="lesson-objectives">Lesson Objectives</h2>
+
+<ul>
+  <li>Distinguish three ways of acquiring online data</li>
+  <li>Break down how web services use HTTP</li>
+  <li>Learn R tools for data acquisition</li>
+</ul>
+
+<h2 id="specific-achievements">Specific Achievements</h2>
+
+<ul>
+  <li>Programatically acquire data embedded in a web page</li>
+  <li>Request data through a REST API</li>
+  <li>Use the <a href="" class="rlib">tidycensus</a> package to acquire data</li>
+  <li>Use SQLite for caching</li>
+</ul>
+
+<h2 id="why-script-data-acquisition">Why script data acquisition?</h2>
+
+<ul>
+  <li>Too time intensive to acquire manually</li>
+  <li>Integrate updated or new data</li>
+  <li>Reproducibility</li>
+  <li>There’s an API between you and the data</li>
+</ul>
+
+<p class="ToS"><a href="#/slides/intro">Top of Section</a></p>
+
+<hr />
+<p><a name="/slides/tiers"></a></p>
+
+<h2 id="acquiring-online-data">Acquiring Online Data</h2>
+
+<p>Data is available on the web in many different forms. How difficult is it to 
+acquire that data to run analyses? It depends which of three approaches
+the data source requires:</p>
+
+<ul>
+  <li>Web scraping</li>
+  <li>Web service (API)</li>
+  <li>Specialized package (API wrapper)</li>
+</ul>
+
+<h2 id="web-scraping-">Web Scraping 🙁</h2>
+
+<p>A web browser reads HTML and JavaScript and displays a human readable page. In
+contrast, a web scraper is a program (a “bot”) that reads HTML and JavaScript 
+and stores the data.</p>
+
+<h2 id="web-service-api-">Web Service (API) 😉</h2>
+
+<p>API stands for Application Programming Interface (API, as opposed to GUI) that is compatible
+with passing data around the internet using HTTP (Hyper-text Transfer Protocol).
+This is not the fastest protocol for moving large datasets, but it is universal
+(it underpins web browsers, after all).</p>
+
+<h2 id="specialized-package-">Specialized Package 😂</h2>
+
+<p>Major data providers can justify writing a “wrapper” package for their API, 
+specific to yourlanguage of choice (e.g. Python or R), that facilitates accessing the
+data they provide through a web service. Sadly, not all do so.</p>
+
+<p class="ToS"><a href="#/slides/tiers">Top of Section</a></p>
+
+<hr />
+<p><a name="/slides/scrape"></a></p>
+
+<h2 id="web-scraping">Web Scraping</h2>
+
+<p>That “http” at the beginning of the URL for a possible data source is
+a protocol—an understanding between a client and a server about how
+to communicate. The client could either be a web browser or your web
+scraping program written in R, as long as it uses the correct protocol. 
+After all, <a href="https://xkcd.com/869/">servers exist to serve</a>.</p>
+
+<p>The following example
+uses the <a href="" class="rlib">httr</a> and <a href="" class="rlib">rvest</a> packages to issue a 
+HTTP request and handle the response.</p>
+
+<p class="notes">The page we are scraping, <a href="http://research.jisao.washington.edu/pdo/PDO.latest">http://research.jisao.washington.edu/pdo/PDO.latest</a>,
+deals with the <a href="https://en.wikipedia.org/wiki/Pacific_decadal_oscillation">Pacific Decadal Oscillation</a> 
+(PDO), a periodic switching between
+warm and cool water temperatures in the northern Pacific Ocean. Specifically, it
+contains monthly values from 1900-2018 indicating how far above or below normal the sea surface
+temperature across the northern Pacific Ocean was during that month.</p>
+
+<div class="language-r text-document highlighter-rouge" title="worksheet-6.R"><div class="highlight"><pre class="highlight"><code><span class="n">library</span><span class="p">(</span><span class="n">httr</span><span class="p">)</span><span class="w">
+
+</span><span class="n">response</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">GET</span><span class="p">(</span><span class="s1">'http://research.jisao.washington.edu/pdo/PDO.latest'</span><span class="p">)</span><span class="w">
+</span><span class="n">response</span><span class="w">
+</span></code></pre></div></div>
+
+<div class="language-plaintext output highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Response [http://research.jisao.washington.edu/pdo/PDO.latest]
+  Date: 2020-07-15 12:22
+  Status: 200
+  Content-Type: &lt;unknown&gt;
+  Size: 12.3 kB
+&lt;BINARY BODY&gt;
+</code></pre></div></div>
+
+<p>The response is binary (0s and 1s). The <a href="" class="rlib">rvest</a> package translates
+the raw content into an HTML document, just like a browser does. We use the 
+<code class="language-plaintext highlighter-rouge">read_html</code> function to do this.</p>
+
+<div class="language-r text-document highlighter-rouge" title="worksheet-6.R"><div class="highlight"><pre class="highlight"><code><span class="n">library</span><span class="p">(</span><span class="n">rvest</span><span class="p">)</span><span class="w"> 
+
+</span><span class="n">pdo_doc</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">read_html</span><span class="p">(</span><span class="n">response</span><span class="p">)</span><span class="w">
+</span><span class="n">pdo_doc</span><span class="w">
+</span></code></pre></div></div>
+
+<div class="language-plaintext output highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{html_document}
+&lt;html&gt;
+[1] &lt;body&gt;&lt;p&gt;PDO INDEX\n\nIf the columns of the table appear without formatti ...
+</code></pre></div></div>
+
+<p>If you look at the HTML document, you can see that all the data is inside an 
+element called <code class="language-plaintext highlighter-rouge">"p"</code>. We use the <code class="language-plaintext highlighter-rouge">html_node</code> function to extract the 
+single <code class="language-plaintext highlighter-rouge">"p"</code> element from the HTML document, then the <code class="language-plaintext highlighter-rouge">html_text</code> function
+to extract the text from that element.</p>
+
+<div class="language-r text-document highlighter-rouge" title="worksheet-6.R"><div class="highlight"><pre class="highlight"><code><span class="n">pdo_node</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">html_node</span><span class="p">(</span><span class="n">pdo_doc</span><span class="p">,</span><span class="w"> </span><span class="s2">"p"</span><span class="p">)</span><span class="w">
+</span><span class="n">pdo_text</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">html_text</span><span class="p">(</span><span class="n">pdo_node</span><span class="p">)</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Now we have a long text string containing all the data. We can use text mining tools
+like regular expressions to pull out data. If we want the twelve monthly
+values for the year 2017, we can use the <a href="" class="rlib">stringr</a> package to get 
+all the text between the strings “2017” and “2018” with <code class="language-plaintext highlighter-rouge">str_match</code>.</p>
+
+<div class="language-r text-document highlighter-rouge" title="worksheet-6.R"><div class="highlight"><pre class="highlight"><code><span class="n">library</span><span class="p">(</span><span class="n">stringr</span><span class="p">)</span><span class="w">
+</span><span class="n">pdo_text_2017</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">str_match</span><span class="p">(</span><span class="n">pdo_text</span><span class="p">,</span><span class="w"> </span><span class="s2">"(?&lt;=2017).*.(?=\\n2018)"</span><span class="p">)</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Then extract all the numeric values in the substring with <code class="language-plaintext highlighter-rouge">str_extract_all</code>.</p>
+
+<div class="language-r text-document highlighter-rouge" title="worksheet-6.R"><div class="highlight"><pre class="highlight"><code><span class="n">str_extract_all</span><span class="p">(</span><span class="n">pdo_text_2017</span><span class="p">[</span><span class="m">1</span><span class="p">],</span><span class="w"> </span><span class="s2">"[0-9-.]+"</span><span class="p">)</span><span class="w">
+</span></code></pre></div></div>
+
+<div class="language-plaintext output highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[[1]]
+ [1] "0.77" "0.70" "0.74" "1.12" "0.88" "0.79" "0.10" "0.09" "0.32" "0.05"
+[11] "0.15" "0.50"
+</code></pre></div></div>
+
+<p class="notes">You can learn more about how to use regular expressions to extract information
+from text strings in <a href="https://cyberhelp.sesync.org/text-mining-lesson/">SESYNC’s text mining lesson</a>.</p>
+
+<h2 id="manual-web-scraping-is-hard">Manual web scraping is hard!</h2>
+
+<p>Pages designed for humans are increasingly harder to parse programmatically.</p>
+
+<ul>
+  <li>Servers provide different responses based on client “metadata”</li>
+  <li>JavaScript often needs to be executed by the client</li>
+  <li>The HTML <code class="language-plaintext highlighter-rouge">&lt;table&gt;</code> is drifting into obscurity (mostly for the better)</li>
+</ul>
+
+<h2 id="html-tables">HTML Tables</h2>
+
+<p>Sites with easily accessible html tables nowadays may be specifically
+intended to be parsed programmatically, rather than browsed by a human reader.
+The US Census provides some documentation for their data services in a massive table:</p>
+
+<p><a href="https://api.census.gov/data/2017/acs/acs5/variables.html">https://api.census.gov/data/2017/acs/acs5/variables.html</a></p>
+
+<p><code class="language-plaintext highlighter-rouge">html_table()</code> converts the html table into an R 
+data frame. Set <code class="language-plaintext highlighter-rouge">fill = TRUE</code> so that inconsistent numbers 
+of columns in each row are filled in.</p>
+
+<div class="language-r text-document highlighter-rouge" title="worksheet-6.R"><div class="highlight"><pre class="highlight"><code><span class="n">census_vars_doc</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">read_html</span><span class="p">(</span><span class="s1">'https://api.census.gov/data/2017/acs/acs5/variables.html'</span><span class="p">)</span><span class="w">
+
+</span><span class="n">table_raw</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">html_node</span><span class="p">(</span><span class="n">census_vars_doc</span><span class="p">,</span><span class="w"> </span><span class="s1">'table'</span><span class="p">)</span><span class="w">
+
+</span><span class="c1"># This line takes a few moments to run.</span><span class="w">
+</span><span class="n">census_vars</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">html_table</span><span class="p">(</span><span class="n">table_raw</span><span class="p">,</span><span class="w"> </span><span class="n">fill</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">TRUE</span><span class="p">)</span><span class="w"> 
+</span></code></pre></div></div>
+
+<div class="language-r input highlighter-rouge" title="Console"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;</span><span class="w"> </span><span class="n">head</span><span class="p">(</span><span class="n">census_vars</span><span class="p">)</span><span class="w">
+</span></code></pre></div></div>
+
+<div class="language-plaintext output highlighter-rouge"><div class="highlight"><pre class="highlight"><code>             Name           Label                                   Concept
+1 25110 variables 25110 variables                           25110 variables
+2          AIANHH       Geography                                          
+3          AIHHTL       Geography                                          
+4           AIRES       Geography                                          
+5            ANRC       Geography                                          
+6     B00001_001E Estimate!!Total UNWEIGHTED SAMPLE COUNT OF THE POPULATION
+         Required      Attributes           Limit    Predicate Type
+1 25110 variables 25110 variables 25110 variables   25110 variables
+2    not required                               0 (not a predicate)
+3    not required                               0 (not a predicate)
+4    not required                               0 (not a predicate)
+5    not required                               0 (not a predicate)
+6    not required    B00001_001EA               0               int
+            Group              NA
+1 25110 variables 25110 variables
+2             N/A            &lt;NA&gt;
+3             N/A            &lt;NA&gt;
+4             N/A            &lt;NA&gt;
+5             N/A            &lt;NA&gt;
+6          B00001            &lt;NA&gt;
+</code></pre></div></div>
+
+<p>We can use our tidy data tools to search this unwieldy
+documentation for variables of interest.</p>
+
+<p class="notes">The call to <code class="language-plaintext highlighter-rouge">set_tidy_names()</code> is necessary because the table
+extraction results in some columns with undefined names—a
+common occurrence when parsing Web content.</p>
+
+<div class="language-r text-document highlighter-rouge" title="worksheet-6.R"><div class="highlight"><pre class="highlight"><code><span class="n">library</span><span class="p">(</span><span class="n">tidyverse</span><span class="p">)</span><span class="w">
+
+</span><span class="n">census_vars</span><span class="w"> </span><span class="o">%&gt;%</span><span class="w">
+  </span><span class="n">set_tidy_names</span><span class="p">()</span><span class="w"> </span><span class="o">%&gt;%</span><span class="w">
+  </span><span class="n">select</span><span class="p">(</span><span class="n">Name</span><span class="p">,</span><span class="w"> </span><span class="n">Label</span><span class="p">)</span><span class="w"> </span><span class="o">%&gt;%</span><span class="w">
+  </span><span class="n">filter</span><span class="p">(</span><span class="n">grepl</span><span class="p">(</span><span class="s1">'Median household income'</span><span class="p">,</span><span class="w"> </span><span class="n">Label</span><span class="p">))</span><span class="w">
+</span></code></pre></div></div>
+
+<div class="language-plaintext output highlighter-rouge"><div class="highlight"><pre class="highlight"><code>           Name
+1   B19013_001E
+2  B19013A_001E
+3  B19013B_001E
+4  B19013C_001E
+5  B19013D_001E
+6  B19013E_001E
+7  B19013F_001E
+8  B19013G_001E
+9  B19013H_001E
+10 B19013I_001E
+11  B19049_001E
+12  B19049_002E
+13  B19049_003E
+14  B19049_004E
+15  B19049_005E
+16  B25099_001E
+17  B25099_002E
+18  B25099_003E
+19  B25119_001E
+20  B25119_002E
+21  B25119_003E
+                                                                                                                         Label
+1                                 Estimate!!Median household income in the past 12 months (in 2017 inflation-adjusted dollars)
+2                                 Estimate!!Median household income in the past 12 months (in 2017 inflation-adjusted dollars)
+3                                 Estimate!!Median household income in the past 12 months (in 2017 inflation-adjusted dollars)
+4                                 Estimate!!Median household income in the past 12 months (in 2017 inflation-adjusted dollars)
+5                                 Estimate!!Median household income in the past 12 months (in 2017 inflation-adjusted dollars)
+6                                 Estimate!!Median household income in the past 12 months (in 2017 inflation-adjusted dollars)
+7                                 Estimate!!Median household income in the past 12 months (in 2017 inflation-adjusted dollars)
+8                                 Estimate!!Median household income in the past 12 months (in 2017 inflation-adjusted dollars)
+9                                 Estimate!!Median household income in the past 12 months (in 2017 inflation-adjusted dollars)
+10                                Estimate!!Median household income in the past 12 months (in 2017 inflation-adjusted dollars)
+11                         Estimate!!Median household income in the past 12 months (in 2017 inflation-adjusted dollars)!!Total
+12    Estimate!!Median household income in the past 12 months (in 2017 inflation-adjusted dollars)!!Householder under 25 years
+13    Estimate!!Median household income in the past 12 months (in 2017 inflation-adjusted dollars)!!Householder 25 to 44 years
+14    Estimate!!Median household income in the past 12 months (in 2017 inflation-adjusted dollars)!!Householder 45 to 64 years
+15 Estimate!!Median household income in the past 12 months (in 2017 inflation-adjusted dollars)!!Householder 65 years and over
+16                                                                                    Estimate!!Median household income!!Total
+17                                 Estimate!!Median household income!!Total!!Median household income for units with a mortgage
+18                              Estimate!!Median household income!!Total!!Median household income for units without a mortgage
+19                         Estimate!!Median household income in the past 12 months (in 2017 inflation-adjusted dollars)!!Total
+20      Estimate!!Median household income in the past 12 months (in 2017 inflation-adjusted dollars)!!Owner occupied (dollars)
+21     Estimate!!Median household income in the past 12 months (in 2017 inflation-adjusted dollars)!!Renter occupied (dollars)
+</code></pre></div></div>
+
+<p class="ToS"><a href="#/slides/scrape">Top of Section</a></p>
+
+<hr />
+<p><a name="/slides/api"></a></p>
+
+<h2 id="web-services">Web Services</h2>
+
+<p>The US Census Bureau provides access to its vast stores of demographic
+data over the Web via their API at <a href="https://api.census.gov">https://api.census.gov</a>.</p>
+
+<p>The <strong>I</strong> in <strong>GUI</strong> is for interface—it’s the same in <strong>API</strong>, where buttons
+and drop-down menus are replaced by functions and object attributes.</p>
+
+<p class="notes">Instead of interfacing with a user, this kind of <strong>i</strong>nterface is suitable for
+use in <strong>p</strong>rogramming another software <strong>a</strong>pplication. In the case of the
+Census, the main component of the application is some relational database
+management system. There are several GUIs designed for humans to
+query the Census database; the Census API is meant for communication between
+your program (i.e. script) and their application.</p>
+
+<p class="notes">You’ll often see the acronym “REST API.” In this context, <strong>REST</strong> stands for
+<strong>Re</strong>presentational <strong>s</strong>tate <strong>t</strong>ransfer. This refers to a set of standards that
+help ensure that the Web service works well with any computer system it 
+may interact with.</p>
+
+<p class="notes">The following code acquires data from the US Census Bureau’s American Community Survey (ACS).
+The ACS is a yearly survey that provides detailed population
+and housing information at fine geographic scale across the United States. 
+ACS5 refers to a five-year average of the annual surveys.</p>
+
+<p>Look carefully at <a href="https://api.census.gov/data/2018/acs5?get=NAME&amp;for=county:*&amp;in=state:24#irrelephant" target="_blank">this URL</a>.</p>
+
+<p>The URL is a query to the US Census API. The parameters after the <code class="language-plaintext highlighter-rouge">?</code>
+request the variable <code class="language-plaintext highlighter-rouge">NAME</code> for all counties in state <code class="language-plaintext highlighter-rouge">24</code> (Maryland).</p>
+
+<p class="notes">In a web service, the already universal system for
+transferring data over the internet, known as HTTP, is half of the
+interface. All you really need is documentation for how to construct
+the URL in a standards-compliant way that the service will recognize.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Section</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">https://</code></td>
+      <td><strong>scheme</strong></td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">api.census.gov</code></td>
+      <td><strong>authority</strong>, or simply domain if there’s no user authentication</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">/data/2018/acs/acs5</code></td>
+      <td><strong>path</strong> to a resource within a hierarchy</td>
+    </tr>
+  </tbody>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">?</code></td>
+      <td>beginning of the <strong>query</strong> component of a URL</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">get=NAME</code></td>
+      <td>first query parameter</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">&amp;</code></td>
+      <td>query parameter separator</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">for=county:*</code></td>
+      <td>second query parameter</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">&amp;</code></td>
+      <td>query parameter separator</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">in=state:24</code></td>
+      <td>third query parameter</td>
+    </tr>
+  </tbody>
+  <tbody>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">#</code></td>
+      <td>beginning of the <strong>fragment</strong> component of a URL</td>
+    </tr>
+    <tr>
+      <td><code class="language-plaintext highlighter-rouge">irrelephant</code></td>
+      <td>a document section, it isn’t even sent to the server</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>To construct the URL in R and send the query to the API, use <code class="language-plaintext highlighter-rouge">GET()</code> from 
+<a href="" class="rlib">httr</a>.</p>
+
+<p class="notes">The first argument to <code class="language-plaintext highlighter-rouge">GET()</code> is the base URL, and the 
+<code class="language-plaintext highlighter-rouge">query</code> argument is a named list that can use to pass 
+the parameters of the query to the API. All the elements
+of the list should be character strings.</p>
+
+<div class="language-r text-document highlighter-rouge" title="worksheet-6.R"><div class="highlight"><pre class="highlight"><code><span class="n">path</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s1">'https://api.census.gov/data/2018/acs/acs5'</span><span class="w">
+</span><span class="n">query_params</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">list</span><span class="p">(</span><span class="s1">'get'</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'NAME,B19013_001E'</span><span class="p">,</span><span class="w"> 
+                     </span><span class="s1">'for'</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'county:*'</span><span class="p">,</span><span class="w">
+                     </span><span class="s1">'in'</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'state:24'</span><span class="p">)</span><span class="w">
+
+</span><span class="n">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">GET</span><span class="p">(</span><span class="n">path</span><span class="p">,</span><span class="w"> </span><span class="n">query</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">query_params</span><span class="p">)</span><span class="w">
+</span><span class="n">response</span><span class="w">
+</span></code></pre></div></div>
+
+<div class="language-plaintext output highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Response [https://api.census.gov/data/2018/acs/acs5?get=NAME%2CB19013_001E&amp;for=county%3A%2A&amp;in=state%3A24]
+  Date: 2020-07-15 12:31
+  Status: 200
+  Content-Type: application/json;charset=utf-8
+  Size: 1.25 kB
+[["NAME","B19013_001E","state","county"],
+["Worcester County, Maryland","61145","24","047"],
+["Baltimore city, Maryland","48840","24","510"],
+["Talbot County, Maryland","67204","24","041"],
+["Harford County, Maryland","85942","24","025"],
+["Howard County, Maryland","117730","24","027"],
+["Anne Arundel County, Maryland","97810","24","003"],
+["Baltimore County, Maryland","74127","24","005"],
+["Calvert County, Maryland","104301","24","009"],
+["Garrett County, Maryland","49619","24","023"],
+...
+</code></pre></div></div>
+
+<h2 id="response-header">Response Header</h2>
+
+<p>The response from the API is a bunch of 0s and 1s, but part of the
+HTTP protocol is to include a “header” with information about how
+to decode the body of the response.</p>
+
+<p>Most REST APIs return as the “content” either:</p>
+
+<ol>
+  <li>Javascript Object Notation (JSON)
+    <ul>
+      <li>a UTF-8 encoded string of key-value pairs, where values may be lists</li>
+      <li>e.g. <code class="language-plaintext highlighter-rouge">{'a':24, 'b': ['x', 'y', 'z']}</code></li>
+    </ul>
+  </li>
+  <li>eXtensible Markup Language (XML)
+    <ul>
+      <li>a nested <code class="language-plaintext highlighter-rouge">&lt;tag&gt;&lt;/tag&gt;</code> hierarchy serving the same purpose</li>
+    </ul>
+  </li>
+</ol>
+
+<p>The header from Census says the content type is JSON.</p>
+
+<div class="language-r text-document highlighter-rouge" title="worksheet-6.R"><div class="highlight"><pre class="highlight"><code><span class="n">response</span><span class="o">$</span><span class="n">headers</span><span class="p">[</span><span class="s1">'content-type'</span><span class="p">]</span><span class="w">
+</span></code></pre></div></div>
+
+<div class="language-plaintext output highlighter-rouge"><div class="highlight"><pre class="highlight"><code>$`content-type`
+[1] "application/json;charset=utf-8"
+</code></pre></div></div>
+
+<h2 id="response-content">Response Content</h2>
+
+<p>First, use <code class="language-plaintext highlighter-rouge">httr::content()</code> to retrieve
+the JSON content of the response. Use <code class="language-plaintext highlighter-rouge">as = 'text'</code> to
+get the content as a character vector. Then use
+<code class="language-plaintext highlighter-rouge">jsonlite::fromJSON()</code> to convert to tabular format.</p>
+
+<div class="language-r text-document highlighter-rouge" title="worksheet-6.R"><div class="highlight"><pre class="highlight"><code><span class="n">library</span><span class="p">(</span><span class="n">jsonlite</span><span class="p">)</span><span class="w">
+</span><span class="n">county_income</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">response</span><span class="w"> </span><span class="o">%&gt;%</span><span class="w">
+  </span><span class="n">content</span><span class="p">(</span><span class="n">as</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'text'</span><span class="p">)</span><span class="w"> </span><span class="o">%&gt;%</span><span class="w">
+  </span><span class="n">fromJSON</span><span class="p">()</span><span class="w">
+</span></code></pre></div></div>
+
+<div class="language-r input highlighter-rouge" title="Console"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;</span><span class="w"> </span><span class="n">head</span><span class="p">(</span><span class="n">county_income</span><span class="p">)</span><span class="w">
+</span></code></pre></div></div>
+
+<div class="language-plaintext output highlighter-rouge"><div class="highlight"><pre class="highlight"><code>     [,1]                         [,2]          [,3]    [,4]    
+[1,] "NAME"                       "B19013_001E" "state" "county"
+[2,] "Worcester County, Maryland" "61145"       "24"    "047"   
+[3,] "Baltimore city, Maryland"   "48840"       "24"    "510"   
+[4,] "Talbot County, Maryland"    "67204"       "24"    "041"   
+[5,] "Harford County, Maryland"   "85942"       "24"    "025"   
+[6,] "Howard County, Maryland"    "117730"      "24"    "027"   
+</code></pre></div></div>
+
+<p class="notes">Notice that the matrix created by <code class="language-plaintext highlighter-rouge">fromJSON()</code> does not recognize that the first
+row is a header, resulting in all columns being classified as 
+character. This is a typical situation when parsing Web content, and would require</p>
+
+<h2 id="api-keys--limits">API Keys &amp; Limits</h2>
+
+<p>Most servers request good behavior, others enforce it.</p>
+
+<ul>
+  <li>Size of single query</li>
+  <li>Rate of queries (calls per second, or per day)</li>
+  <li>User credentials specified by an API key</li>
+</ul>
+
+<p>From the Census FAQ <a href="https://www.census.gov/data/developers/guidance/api-user-guide.Query_Components.html">What Are the Query Limits?</a>:</p>
+
+<blockquote>
+  <p>You can include up to 50 variables in a single API query and can make
+up to 500 queries per IP address per day…  Please keep in mind that
+all queries from a business or organization having multiple employees
+might employ a proxy service or firewall. This will make all of the
+users of that business or organization appear to have the same IP
+address.</p>
+</blockquote>
+
+<p class="ToS"><a href="#/slides/api">Top of Section</a></p>
+
+<hr />
+<p><a name="/slides/census"></a></p>
+
+<h2 id="specialized-packages">Specialized Packages</h2>
+
+<p>The third tier of access to online data is much preferred, if it
+exists: a dedicated package in your programming language’s repository,
+<a href="http://cran.r-project.org">CRAN</a> or <a href="http://pypi.python.org">PyPI</a>.</p>
+
+<ul>
+  <li>Additional guidance on query parameters</li>
+  <li>Returns data in native formats</li>
+  <li>Handles all “encoding” problems</li>
+</ul>
+
+<p>The <a href="" class="rlib">tidycensus</a> package, developed by Kyle Walker,
+streamlines access to the API and is integrated with <a href="" class="rlib">tidyverse</a> packages.</p>
+
+<p class="notes">To repeat the exercise below at home, request an API key at
+<a href="https://api.census.gov/data/key_signup.html">https://api.census.gov/data/key_signup.html</a>, and store it in a file named <code class="language-plaintext highlighter-rouge">census_api_key.R</code>
+in your working directory. The file should contain the line 
+<code class="language-plaintext highlighter-rouge">Sys.setenv(CENSUS_API_KEY = 'your many digit key')</code>. This creates a hidden
+system variable containing the key. This is good practice—it is much safer than
+pasting the API key directly into your code or saving it as a variable in the global environment.</p>
+
+<div class="language-r text-document highlighter-rouge" title="worksheet-6.R"><div class="highlight"><pre class="highlight"><code><span class="n">library</span><span class="p">(</span><span class="n">tidycensus</span><span class="p">)</span><span class="w">
+</span></code></pre></div></div>
+
+<div class="language-r input highlighter-rouge" title="Console"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;</span><span class="w"> </span><span class="n">source</span><span class="p">(</span><span class="s1">'census_api_key.R'</span><span class="p">)</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Compared to using the API directly via the <a href="" class="rlib">httr</a> package:</p>
+
+<p><strong>Pros</strong></p>
+<ul>
+  <li>More concise code, quicker development</li>
+  <li>Package documentation (if present) is usually more user-friendly than API documentaion.</li>
+  <li>May allow seamless update if API changes</li>
+</ul>
+
+<p><strong>Cons</strong></p>
+<ul>
+  <li>No guarantee of updates</li>
+  <li>Possibly limited in scope</li>
+</ul>
+
+<p>Query the Census ACS5 survey for the variable <code class="language-plaintext highlighter-rouge">B19013_001E</code> (median annual household income,
+in dollars) and each entity’s <code class="language-plaintext highlighter-rouge">NAME</code>.</p>
+
+<div class="language-r text-document highlighter-rouge" title="worksheet-6.R"><div class="highlight"><pre class="highlight"><code><span class="n">variables</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">c</span><span class="p">(</span><span class="s1">'NAME'</span><span class="p">,</span><span class="w"> </span><span class="s1">'B19013_001E'</span><span class="p">)</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Get the variables <code class="language-plaintext highlighter-rouge">NAME</code> and <code class="language-plaintext highlighter-rouge">B19013_001E</code> (median household income) 
+from all counties in Maryland. <a href="" class="rlib">tidycensus</a>
+converts the JSON string into a data frame. (No need to check headers.)</p>
+
+<p class="notes">This code uses the <code class="language-plaintext highlighter-rouge">get_acs</code> function, which is the main function in 
+<a href="" class="rlib">tidycensus</a> for interacting with the American Community Survey 
+API. The arguments are fairly self-explanatory. We can use the text 
+abbreviation for the state of Maryland (<code class="language-plaintext highlighter-rouge">MD</code>); the function automatically
+converts this into the numerical FIPS code. The <code class="language-plaintext highlighter-rouge">geometry = TRUE</code> argument
+means that we want <code class="language-plaintext highlighter-rouge">get_acs</code> output to include the county boundaries as a
+spatial object.</p>
+
+<div class="language-r text-document highlighter-rouge" title="worksheet-6.R"><div class="highlight"><pre class="highlight"><code><span class="n">county_income</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">get_acs</span><span class="p">(</span><span class="n">geography</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'county'</span><span class="p">,</span><span class="w">
+                         </span><span class="n">variables</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">variables</span><span class="p">,</span><span class="w">
+                         </span><span class="n">state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'MD'</span><span class="p">,</span><span class="w">
+                         </span><span class="n">year</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">2018</span><span class="p">,</span><span class="w">
+                         </span><span class="n">geometry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">TRUE</span><span class="p">)</span><span class="w">
+</span></code></pre></div></div>
+
+<div class="language-r input highlighter-rouge" title="Console"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;</span><span class="w"> </span><span class="n">head</span><span class="p">(</span><span class="n">county_income</span><span class="p">)</span><span class="w">
+</span></code></pre></div></div>
+
+<div class="language-plaintext output highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Simple feature collection with 6 features and 5 fields
+geometry type:  MULTIPOLYGON
+dimension:      XY
+bbox:           xmin: -79.06756 ymin: 38.31653 xmax: -75.70736 ymax: 39.72304
+CRS:            4269
+</code></pre></div></div>
+
+<div class="language-plaintext output highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Warning: `...` is not empty.
+
+We detected these problematic arguments:
+* `needs_dots`
+
+These dots only exist to allow future extensions and should be empty.
+Did you misspecify an argument?
+</code></pre></div></div>
+
+<div class="language-plaintext output highlighter-rouge"><div class="highlight"><pre class="highlight"><code># A tibble: 6 x 6
+  GEOID NAME        variable estimate   moe                             geometry
+  &lt;chr&gt; &lt;chr&gt;       &lt;chr&gt;       &lt;dbl&gt; &lt;dbl&gt;                   &lt;MULTIPOLYGON [°]&gt;
+1 24001 Allegany C… B19013_…    44065  1148 (((-79.06756 39.47944, -79.06003 39…
+2 24003 Anne Arund… B19013_…    97810  1299 (((-76.84036 39.10314, -76.83678 39…
+3 24005 Baltimore … B19013_…    74127   922 (((-76.3257 39.31397, -76.32452 39.…
+4 24009 Calvert Co… B19013_…   104301  3548 (((-76.70121 38.71276, -76.69915 38…
+5 24011 Caroline C… B19013_…    54956  2419 (((-76.01505 38.72869, -76.01321 38…
+6 24013 Carroll Co… B19013_…    93363  1867 (((-77.31151 39.63914, -77.30972 39…
+</code></pre></div></div>
+
+<p>We can use <a href="" class="rlib">dplyr</a> to manipulate the output, and <a href="" class="rlib">ggplot2</a> to visualize the data.
+Because we set <code class="language-plaintext highlighter-rouge">geometry = TRUE</code>, <a href="" class="rlib">tidycensus</a> even includes spatial information in its
+output that we can use to create maps!</p>
+
+<p class="notes">This code uses the spatial data frame output from <code class="language-plaintext highlighter-rouge">get_acs</code> to plot the counties of Maryland with
+fill color corresponding to the median household income of the counties, with some additional
+graphical options.</p>
+
+<div class="language-r text-document highlighter-rouge" title="worksheet-6.R"><div class="highlight"><pre class="highlight"><code><span class="n">ggplot</span><span class="p">(</span><span class="n">county_income</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> 
+  </span><span class="n">geom_sf</span><span class="p">(</span><span class="n">aes</span><span class="p">(</span><span class="n">fill</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">estimate</span><span class="p">),</span><span class="w"> </span><span class="n">color</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">NA</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> 
+  </span><span class="n">coord_sf</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> 
+  </span><span class="n">theme_minimal</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> 
+  </span><span class="n">scale_fill_viridis_c</span><span class="p">()</span><span class="w">
+</span></code></pre></div></div>
+<p class="captioned"><img src="https://cdn.jsdelivr.net/gh/SESYNC-ci/online-data-with-R-lesson@v0.2/docs/assets/images/census/unnamed-chunk-6-1.png" alt=" " /></p>
+
+<p class="notes">For a more in-depth tutorial on R’s geospatial data types, check out 
+<a href="https://cyberhelp.sesync.org/geospatial-packages-in-R-lesson">SESYNC’s lesson on geospatial packages in R</a>.</p>
+
+<p class="ToS"><a href="#/slides/census">Top of Section</a></p>
+
+<hr />
+<p><a name="/slides/rdbms"></a></p>
+
+<h2 id="paging--stashing">Paging &amp; Stashing</h2>
+
+<p>A common strategy that web service providers take to balance their
+load is to limit the number of records a single API request can
+return. The user ends up having to flip through “pages” with the API,
+handling the response content at each iteration. Options for stashing
+data are:</p>
+
+<ol>
+  <li>Store it all in memory, write to file at the end.</li>
+  <li>Append each response to a file, writing frequently.</li>
+  <li>Offload these decisions to database management software.</li>
+</ol>
+
+<p class="notes">The <a href="https://www.data.gov">data.gov</a> API provides a case in point. 
+Data.gov is a service provided by the U.S. federal government to make data available
+from across many government agencies. It hosts a catalog of raw data and of many other
+APIs from across government.
+Among the APIs catalogued by data.gov is the <a href="https://fdc.nal.usda.gov/">FoodData Central</a> API.
+The U.S. Department of Agriculture maintains a data system of nutrition information 
+for thousands of foods. 
+We might be interested in the relative nutrient content of different fruits.</p>
+
+<p class="notes">To repeat the exercise below at home, request an API key at
+https://api.data.gov/signup/, and store it in a file named <code class="language-plaintext highlighter-rouge">datagov_api_key.R</code>
+in your working directory. The file should contain the line 
+<code class="language-plaintext highlighter-rouge">Sys.setenv(DATAGOV_KEY = 'your many digit key')</code>.</p>
+
+<p>Load the <code class="language-plaintext highlighter-rouge">DATAGOV_KEY</code> variable as a system variable by importing it from the file you saved it in.</p>
+
+<div class="language-r input highlighter-rouge" title="Console"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;</span><span class="w"> </span><span class="n">source</span><span class="p">(</span><span class="s1">'datagov_api_key.R'</span><span class="p">)</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Run an API query for all foods with <code class="language-plaintext highlighter-rouge">"fruit"</code> in their name and parse the content of the response.</p>
+
+<p class="notes">Just like we did previously in this lesson, we create a named list 
+of query parameters, including the API key and the
+search string, and pass them to <code class="language-plaintext highlighter-rouge">GET()</code>. We use the pipe operator <code class="language-plaintext highlighter-rouge">%&gt;%</code> 
+to pipe the output of <code class="language-plaintext highlighter-rouge">GET()</code> to <code class="language-plaintext highlighter-rouge">content()</code>. We use the <code class="language-plaintext highlighter-rouge">as = 'parsed'</code>
+argument to convert the JSON content to a nested list.</p>
+
+<div class="language-r text-document highlighter-rouge" title="worksheet-6.R"><div class="highlight"><pre class="highlight"><code><span class="n">api</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s1">'https://api.nal.usda.gov/fdc/v1/'</span><span class="w">
+</span><span class="n">path</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s1">'foods/search'</span><span class="w">
+
+</span><span class="n">query_params</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">list</span><span class="p">(</span><span class="s1">'api_key'</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Sys.getenv</span><span class="p">(</span><span class="s1">'DATAGOV_KEY'</span><span class="p">),</span><span class="w">
+                     </span><span class="s1">'query'</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'fruit'</span><span class="p">)</span><span class="w">
+
+</span><span class="n">doc</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">GET</span><span class="p">(</span><span class="n">paste0</span><span class="p">(</span><span class="n">api</span><span class="p">,</span><span class="w"> </span><span class="n">path</span><span class="p">),</span><span class="w"> </span><span class="n">query</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">query_params</span><span class="p">)</span><span class="w"> </span><span class="o">%&gt;%</span><span class="w">
+  </span><span class="n">content</span><span class="p">(</span><span class="n">as</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'parsed'</span><span class="p">)</span><span class="w">
+</span></code></pre></div></div>
+
+<p>Extract data from the returned JSON object, which gets mapped to an
+R list called <code class="language-plaintext highlighter-rouge">doc</code>.
+First inspect the names of the list elements.</p>
+
+<div class="language-r input highlighter-rouge" title="Console"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;</span><span class="w"> </span><span class="nf">names</span><span class="p">(</span><span class="n">doc</span><span class="p">)</span><span class="w">
+</span></code></pre></div></div>
+
+<div class="language-plaintext output highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[1] "foodSearchCriteria" "totalHits"          "currentPage"       
+[4] "totalPages"         "foods"             
+</code></pre></div></div>
+
+<p>We can print the value of <code class="language-plaintext highlighter-rouge">doc$totalHits</code> to see
+how many foods matched our search term, <code class="language-plaintext highlighter-rouge">"fruit"</code>.</p>
+
+<div class="language-r input highlighter-rouge" title="Console"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;</span><span class="w"> </span><span class="n">doc</span><span class="o">$</span><span class="n">totalHits</span><span class="w">
+</span></code></pre></div></div>
+
+<div class="language-plaintext output highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[1] 18801
+</code></pre></div></div>
+
+<p>The claimed number of results is much larger than the length
+of the <code class="language-plaintext highlighter-rouge">foods</code> array contained in this response. The query returned only the
+first page, with 50 items.</p>
+
+<div class="language-r input highlighter-rouge" title="Console"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;</span><span class="w"> </span><span class="nf">length</span><span class="p">(</span><span class="n">doc</span><span class="o">$</span><span class="n">foods</span><span class="p">)</span><span class="w">
+</span></code></pre></div></div>
+
+<div class="language-plaintext output highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[1] 50
+</code></pre></div></div>
+
+<p>Continue to inspect the returned object. Extract one element from the list
+of <code class="language-plaintext highlighter-rouge">foods</code> and view its description.</p>
+
+<div class="language-r input highlighter-rouge" title="Console"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;</span><span class="w"> </span><span class="n">fruit</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">doc</span><span class="o">$</span><span class="n">foods</span><span class="p">[[</span><span class="m">1</span><span class="p">]]</span><span class="w">
+</span><span class="o">&gt;</span><span class="w"> </span><span class="n">fruit</span><span class="o">$</span><span class="n">description</span><span class="w">
+</span></code></pre></div></div>
+
+<div class="language-plaintext output highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[1] "Fruit leather and fruit snacks candy"
+</code></pre></div></div>
+
+<p>The <code class="language-plaintext highlighter-rouge">map_dfr</code> function from the <a href="" class="rlib">purrr</a> package extracts the name and
+value of all the nutrients in the <code class="language-plaintext highlighter-rouge">foodNutrients</code> list within the first search
+result, and creates a data frame.</p>
+
+<div class="language-r text-document highlighter-rouge" title="worksheet-6.R"><div class="highlight"><pre class="highlight"><code><span class="n">nutrients</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">map_dfr</span><span class="p">(</span><span class="n">fruit</span><span class="o">$</span><span class="n">foodNutrients</span><span class="p">,</span><span class="w"> 
+                     </span><span class="o">~</span><span class="w"> </span><span class="n">data.frame</span><span class="p">(</span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">.</span><span class="o">$</span><span class="n">nutrientName</span><span class="p">,</span><span class="w"> 
+                                  </span><span class="n">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">.</span><span class="o">$</span><span class="n">value</span><span class="p">))</span><span class="w">
+</span></code></pre></div></div>
+
+<div class="language-r input highlighter-rouge" title="Console"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;</span><span class="w"> </span><span class="n">head</span><span class="p">(</span><span class="n">nutrients</span><span class="p">,</span><span class="w"> </span><span class="m">10</span><span class="p">)</span><span class="w">
+</span></code></pre></div></div>
+
+<div class="language-plaintext output highlighter-rouge"><div class="highlight"><pre class="highlight"><code>                           name  value
+1                       Protein   0.55
+2             Total lipid (fat)   2.84
+3   Carbohydrate, by difference  84.31
+4                        Energy 365.00
+5                Alcohol, ethyl   0.00
+6                         Water  11.25
+7                      Caffeine   0.00
+8                   Theobromine   0.00
+9  Sugars, total including NLEA  53.37
+10         Fiber, total dietary   0.00
+</code></pre></div></div>
+
+<p>The <code class="language-plaintext highlighter-rouge">DBI</code> and <code class="language-plaintext highlighter-rouge">RSQLite</code> packages together allow R to connect to a 
+database-in-a-file. If the <code class="language-plaintext highlighter-rouge">fruits.sqlite</code> file does not exist
+in your working directory already when you try to connect,
+<code class="language-plaintext highlighter-rouge">dbConnect()</code> will create it.</p>
+
+<div class="language-r text-document highlighter-rouge" title="worksheet-6.R"><div class="highlight"><pre class="highlight"><code><span class="n">library</span><span class="p">(</span><span class="n">DBI</span><span class="p">)</span><span class="w"> 
+</span><span class="n">library</span><span class="p">(</span><span class="n">RSQLite</span><span class="p">)</span><span class="w">
+
+</span><span class="n">fruit_db</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">dbConnect</span><span class="p">(</span><span class="n">SQLite</span><span class="p">(),</span><span class="w"> </span><span class="s1">'fruits.sqlite'</span><span class="p">)</span><span class="w"> 
+</span></code></pre></div></div>
+
+<p>Add a new <code class="language-plaintext highlighter-rouge">pageSize</code> parameter by appending a named element
+to the existing <code class="language-plaintext highlighter-rouge">query_params</code> list, to request <code class="language-plaintext highlighter-rouge">100</code> documents per page.</p>
+
+<div class="language-r text-document highlighter-rouge" title="worksheet-6.R"><div class="highlight"><pre class="highlight"><code><span class="n">query_params</span><span class="o">$</span><span class="n">pageSize</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="m">100</span><span class="w">
+</span></code></pre></div></div>
+
+<p>We will send 10 queries to the API to get 1000 total records.
+In each request (each iteration through the loop), 
+advance the query parameter <code class="language-plaintext highlighter-rouge">pageNumber</code> by one. 
+The query will retrieve 100 records, starting with <code class="language-plaintext highlighter-rouge">pageNumber * pageSize</code>.</p>
+
+<p class="notes">We use some <code class="language-plaintext highlighter-rouge">tidyr</code> and <code class="language-plaintext highlighter-rouge">dplyr</code> manipulations to
+extract the ID number, name, and the amount of sugar from each
+of the foods in the page of results returned by the query. The series of 
+<code class="language-plaintext highlighter-rouge">unnest_longer()</code> and <code class="language-plaintext highlighter-rouge">unnest_wider()</code> functions turns the nested list into 
+a data frame by successively converting lists into columns in the data frame.
+This long manipulation is necessary because R does not easily handle the
+nested list structures that APIs return. If we were using
+a specialized API R package, typically it would handle this data wrangling 
+for us. After converting the list to a data frame, we use <code class="language-plaintext highlighter-rouge">filter</code> to retain
+only the rows where the <code class="language-plaintext highlighter-rouge">nutrientName</code> contains the substring <code class="language-plaintext highlighter-rouge">'Sugars, total'</code>
+and then select the three columns we want to keep: the numerical ID of 
+the food, its full name, and its sugar content. Finally the 100-row data
+frame is assigned to the object <code class="language-plaintext highlighter-rouge">values</code>.</p>
+
+<p>Each time through the loop, insert the next 100 fruits 
+(the three-column data frame <code class="language-plaintext highlighter-rouge">values</code>) 
+in bulk to the database with <code class="language-plaintext highlighter-rouge">dbWriteTable()</code>.</p>
+
+<div class="language-r text-document highlighter-rouge" title="worksheet-6.R"><div class="highlight"><pre class="highlight"><code><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="m">1</span><span class="o">:</span><span class="m">10</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+  </span><span class="c1"># Advance page and query</span><span class="w">
+  </span><span class="n">query_params</span><span class="o">$</span><span class="n">pageNumber</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">i</span><span class="w">
+  </span><span class="n">response</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">GET</span><span class="p">(</span><span class="n">paste0</span><span class="p">(</span><span class="n">api</span><span class="p">,</span><span class="w"> </span><span class="n">path</span><span class="p">),</span><span class="w"> </span><span class="n">query</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">query_params</span><span class="p">)</span><span class="w"> 
+  </span><span class="n">page</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">content</span><span class="p">(</span><span class="n">response</span><span class="p">,</span><span class="w"> </span><span class="n">as</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'parsed'</span><span class="p">)</span><span class="w">
+
+  </span><span class="c1"># Convert nested list to data frame</span><span class="w">
+  </span><span class="n">values</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">tibble</span><span class="p">(</span><span class="n">food</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">page</span><span class="o">$</span><span class="n">foods</span><span class="p">)</span><span class="w"> </span><span class="o">%&gt;%</span><span class="w">
+    </span><span class="n">unnest_wider</span><span class="p">(</span><span class="n">food</span><span class="p">)</span><span class="w"> </span><span class="o">%&gt;%</span><span class="w">
+    </span><span class="n">unnest_longer</span><span class="p">(</span><span class="n">foodNutrients</span><span class="p">)</span><span class="w"> </span><span class="o">%&gt;%</span><span class="w">
+    </span><span class="n">unnest_wider</span><span class="p">(</span><span class="n">foodNutrients</span><span class="p">)</span><span class="w"> </span><span class="o">%&gt;%</span><span class="w">
+    </span><span class="n">filter</span><span class="p">(</span><span class="n">grepl</span><span class="p">(</span><span class="s1">'Sugars, total'</span><span class="p">,</span><span class="w"> </span><span class="n">nutrientName</span><span class="p">))</span><span class="w"> </span><span class="o">%&gt;%</span><span class="w">
+    </span><span class="n">select</span><span class="p">(</span><span class="n">fdcId</span><span class="p">,</span><span class="w"> </span><span class="n">description</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="p">)</span><span class="w"> </span><span class="o">%&gt;%</span><span class="w">
+    </span><span class="n">setNames</span><span class="p">(</span><span class="nf">c</span><span class="p">(</span><span class="s1">'foodID'</span><span class="p">,</span><span class="w"> </span><span class="s1">'name'</span><span class="p">,</span><span class="w"> </span><span class="s1">'sugar'</span><span class="p">))</span><span class="w">
+
+  </span><span class="c1"># Stash in database</span><span class="w">
+  </span><span class="n">dbWriteTable</span><span class="p">(</span><span class="n">fruit_db</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'Food'</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">values</span><span class="p">,</span><span class="w"> </span><span class="n">append</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">TRUE</span><span class="p">)</span><span class="w">
+
+</span><span class="p">}</span><span class="w">
+</span></code></pre></div></div>
+
+<p>View the records in the database by reading
+everything we have so far into a data frame
+with <code class="language-plaintext highlighter-rouge">dbReadTable()</code>.</p>
+
+<div class="language-r text-document highlighter-rouge" title="worksheet-6.R"><div class="highlight"><pre class="highlight"><code><span class="n">fruit_sugar_content</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">dbReadTable</span><span class="p">(</span><span class="n">fruit_db</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'Food'</span><span class="p">)</span><span class="w">
+</span></code></pre></div></div>
+
+<div class="language-r input highlighter-rouge" title="Console"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;</span><span class="w"> </span><span class="n">head</span><span class="p">(</span><span class="n">fruit_sugar_content</span><span class="p">,</span><span class="w"> </span><span class="m">10</span><span class="p">)</span><span class="w">
+</span></code></pre></div></div>
+
+<div class="language-plaintext output highlighter-rouge"><div class="highlight"><pre class="highlight"><code>   foodID                                       name sugar
+1  789246       Fruit leather and fruit snacks candy 53.37
+2  781278 Fruit smoothie, with whole fruit and dairy  8.28
+3  786863 Fruit smoothie, with whole fruit, no dairy  8.20
+4  789150                                Fruit sauce 36.23
+5  786838                                Soup, fruit 14.77
+6  789114                                Fruit syrup 53.00
+7  784748                               Bread, fruit 24.96
+8  167781                              Candied fruit 80.68
+9  784768                      Cheesecake with fruit 15.27
+10 784566                           Croissant, fruit 13.98
+</code></pre></div></div>
+
+<p>Don’t forget to disconnect from your database!</p>
+
+<div class="language-r text-document highlighter-rouge" title="worksheet-6.R"><div class="highlight"><pre class="highlight"><code><span class="n">dbDisconnect</span><span class="p">(</span><span class="n">fruit_db</span><span class="p">)</span><span class="w">
+</span></code></pre></div></div>
+
+<p class="ToS"><a href="#/slides/rdbms">Top of Section</a></p>
+
+<hr />
+<p><a name="/slides/conclude"></a></p>
+
+<h2 id="takeaway">Takeaway</h2>
+
+<ul>
+  <li>
+    <p>Web scraping is hard and unreliable, but sometimes there is no other option.</p>
+  </li>
+  <li>
+    <p>Web services are the most common resource.</p>
+  </li>
+  <li>
+    <p>Use a package specific to your API if one is available.</p>
+  </li>
+</ul>
+
+<p class="notes">Web services do not always have great documentation—what parameters are
+acceptable or necessary may not be clear. Some may even be poorly documented on
+purpose if the API wasn’t designed for public use! Even if you plan to acquire
+data using the “raw” web service, try a search for a relevant package on CRAN.
+The package documentation could help.</p>
+
+<p class="notes"><strong>A final note on U.S. Census packages</strong>: In this lesson, we use Kyle Walker’s <a href="" class="rlib">tidycensus</a>
+package, but you might also want to take a look at Hannah Recht’s
+<a href="" class="rlib">censusapi</a> or Ezra Glenn’s <a href="" class="rlib">acs</a>. All three
+packages take slightly different approaches to obtaining data from the U.S.
+Census API.</p>
+
+<p class="ToS"><a href="#/slides/conclude">Top of Section</a></p>
+
+<hr />
+<p><a name="/slides/exercise"></a></p>
+
+<h2 id="exercises">Exercises</h2>
+
+<h3 id="exercise-1">Exercise 1</h3>
+
+<p>Create a data frame with the population of all countries in the world by scraping
+the <a href="https://en.wikipedia.org/wiki/List_of_countries_and_dependencies_by_population">Wikipedia list of countries by population</a>.
+<em>Hint</em>: First call the function <code class="language-plaintext highlighter-rouge">read_html()</code>, then call <code class="language-plaintext highlighter-rouge">html_node()</code>
+on the output of <code class="language-plaintext highlighter-rouge">read_html()</code> with the argument <code class="language-plaintext highlighter-rouge">xpath='//*[@id="mw-content-text"]/div/table[1]'</code>
+to extract the table element from the HTML content, then call a third function to 
+convert the HTML table to a data frame.</p>
+
+<p class="notes"><a href="#solution-1">View solution</a></p>
+
+<h3 id="exercise-2">Exercise 2</h3>
+
+<p>Identify the name of the census variable in the table of ACS variables whose
+“Concept” column includes “COUNT OF THE POPULATION”. Next, use the Census API to collect
+the data for this variable, for every county in Maryland (FIPS code 24) 
+into a data frame. <em>Optional</em>: Create a map or figure to visualize the data.</p>
+
+<p class="notes"><a href="#solution-2">View solution</a></p>
+
+<h3 id="exercise-3">Exercise 3</h3>
+
+<p>Request an <a href="https://api.data.gov/signup/">API key for data.gov</a>, which will enable you to access the FoodData
+Central API. Use the API to collect 3 “pages” of food results matching a search 
+term of your choice. Save the names of the foods and a nutrient value of your
+choice into a new SQLite file.</p>
+
+<p class="notes"><a href="#solution-3">View solution</a></p>
+
+<h2 id="solutions">Solutions</h2>
+
+<h3 id="solution-1">Solution 1</h3>
+
+<div class="language-r no-eval input highlighter-rouge" title="Console"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;</span><span class="w"> </span><span class="n">library</span><span class="p">(</span><span class="n">rvest</span><span class="p">)</span><span class="w">
+</span><span class="o">&gt;</span><span class="w"> </span><span class="n">url</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s1">'https://en.wikipedia.org/wiki/List_of_countries_and_dependencies_by_population'</span><span class="w">
+</span><span class="o">&gt;</span><span class="w"> </span><span class="n">doc</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">read_html</span><span class="p">(</span><span class="n">url</span><span class="p">)</span><span class="w">
+</span><span class="o">&gt;</span><span class="w"> </span><span class="n">table_node</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">html_node</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span><span class="w"> </span><span class="n">xpath</span><span class="o">=</span><span class="s1">'//*[@id="mw-content-text"]/div/table[1]'</span><span class="p">)</span><span class="w">
+</span><span class="o">&gt;</span><span class="w"> </span><span class="n">pop_table</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">html_table</span><span class="p">(</span><span class="n">table_node</span><span class="p">)</span><span class="w">
+</span></code></pre></div></div>
+
+<p class="notes"><a href="#exercise-1">Return</a></p>
+
+<h3 id="solution-2">Solution 2</h3>
+
+<div class="language-r no-eval input highlighter-rouge" title="Console"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;</span><span class="w"> </span><span class="n">library</span><span class="p">(</span><span class="n">tidyverse</span><span class="p">)</span><span class="w">
+</span><span class="o">&gt;</span><span class="w"> </span><span class="n">library</span><span class="p">(</span><span class="n">tidycensus</span><span class="p">)</span><span class="w">
+</span><span class="o">&gt;</span><span class="w"> </span><span class="n">source</span><span class="p">(</span><span class="s1">'census_api_key.R'</span><span class="p">)</span><span class="w">
+</span><span class="o">&gt;</span><span class="w"> 
+</span><span class="o">&gt;</span><span class="w"> </span><span class="c1"># Using the previously created census_vars table, find the variable ID for population count.</span><span class="w">
+</span><span class="o">&gt;</span><span class="w"> </span><span class="n">census_vars</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">set_tidy_names</span><span class="p">(</span><span class="n">census_vars</span><span class="p">)</span><span class="w">
+</span><span class="o">&gt;</span><span class="w"> </span><span class="n">population_vars</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">census_vars</span><span class="w"> </span><span class="o">%&gt;%</span><span class="w">
+</span><span class="o">+</span><span class="w">   </span><span class="n">filter</span><span class="p">(</span><span class="n">grepl</span><span class="p">(</span><span class="s1">'COUNT OF THE POPULATION'</span><span class="p">,</span><span class="w"> </span><span class="n">Concept</span><span class="p">))</span><span class="w">
+</span><span class="o">&gt;</span><span class="w"> </span><span class="n">pop_var_id</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">population_vars</span><span class="o">$</span><span class="n">Name</span><span class="p">[</span><span class="m">1</span><span class="p">]</span><span class="w">
+</span><span class="o">&gt;</span><span class="w"> 
+</span><span class="o">&gt;</span><span class="w"> </span><span class="c1"># Use tidycensus to query the API.</span><span class="w">
+</span><span class="o">&gt;</span><span class="w"> </span><span class="n">county_pop</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">get_acs</span><span class="p">(</span><span class="n">geography</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'county'</span><span class="p">,</span><span class="w">
+</span><span class="o">+</span><span class="w">                       </span><span class="n">variables</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pop_var_id</span><span class="p">,</span><span class="w">
+</span><span class="o">+</span><span class="w">                       </span><span class="n">state</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'MD'</span><span class="p">,</span><span class="w">
+</span><span class="o">+</span><span class="w">                       </span><span class="n">year</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">2018</span><span class="p">,</span><span class="w">
+</span><span class="o">+</span><span class="w">                       </span><span class="n">geometry</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">TRUE</span><span class="p">)</span><span class="w">
+</span><span class="o">&gt;</span><span class="w"> 
+</span><span class="o">&gt;</span><span class="w"> </span><span class="c1"># Map of counties by population</span><span class="w">
+</span><span class="o">&gt;</span><span class="w"> </span><span class="n">ggplot</span><span class="p">(</span><span class="n">county_pop</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> 
+</span><span class="o">+</span><span class="w">   </span><span class="n">geom_sf</span><span class="p">(</span><span class="n">aes</span><span class="p">(</span><span class="n">fill</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">estimate</span><span class="p">),</span><span class="w"> </span><span class="n">color</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">NA</span><span class="p">)</span><span class="w"> </span><span class="o">+</span><span class="w"> 
+</span><span class="o">+</span><span class="w">   </span><span class="n">coord_sf</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> 
+</span><span class="o">+</span><span class="w">   </span><span class="n">theme_minimal</span><span class="p">()</span><span class="w"> </span><span class="o">+</span><span class="w"> 
+</span><span class="o">+</span><span class="w">   </span><span class="n">scale_fill_viridis_c</span><span class="p">()</span><span class="w">
+</span></code></pre></div></div>
+
+<p class="notes"><a href="#exercise-2">Return</a></p>
+
+<h3 id="solution-3">Solution 3</h3>
+
+<p>Here is a possible solution getting the protein content from different kinds of cheese.</p>
+
+<div class="language-r no-eval input highlighter-rouge" title="Console"><div class="highlight"><pre class="highlight"><code><span class="o">&gt;</span><span class="w"> </span><span class="n">library</span><span class="p">(</span><span class="n">httr</span><span class="p">)</span><span class="w">
+</span><span class="o">&gt;</span><span class="w"> </span><span class="n">library</span><span class="p">(</span><span class="n">DBI</span><span class="p">)</span><span class="w"> 
+</span><span class="o">&gt;</span><span class="w"> </span><span class="n">library</span><span class="p">(</span><span class="n">RSQLite</span><span class="p">)</span><span class="w">
+</span><span class="o">&gt;</span><span class="w"> 
+</span><span class="o">&gt;</span><span class="w"> </span><span class="n">source</span><span class="p">(</span><span class="s1">'datagov_api_key.R'</span><span class="p">)</span><span class="w">
+</span><span class="o">&gt;</span><span class="w"> 
+</span><span class="o">&gt;</span><span class="w"> </span><span class="n">api</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s1">'https://api.nal.usda.gov/fdc/v1/'</span><span class="w">
+</span><span class="o">&gt;</span><span class="w"> </span><span class="n">path</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="s1">'foods/search'</span><span class="w">
+</span><span class="o">&gt;</span><span class="w"> 
+</span><span class="o">&gt;</span><span class="w"> </span><span class="n">query_params</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">list</span><span class="p">(</span><span class="s1">'api_key'</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Sys.getenv</span><span class="p">(</span><span class="s1">'DATAGOV_KEY'</span><span class="p">),</span><span class="w">
+</span><span class="o">+</span><span class="w">                      </span><span class="s1">'query'</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'cheese'</span><span class="p">,</span><span class="w">
+</span><span class="o">+</span><span class="w">                      </span><span class="s1">'pageSize'</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="m">100</span><span class="p">)</span><span class="w">
+</span><span class="o">&gt;</span><span class="w"> 
+</span><span class="o">&gt;</span><span class="w"> </span><span class="c1"># Create a new database</span><span class="w">
+</span><span class="o">&gt;</span><span class="w"> </span><span class="n">cheese_db</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">dbConnect</span><span class="p">(</span><span class="n">SQLite</span><span class="p">(),</span><span class="w"> </span><span class="s1">'cheese.sqlite'</span><span class="p">)</span><span class="w"> 
+</span><span class="o">&gt;</span><span class="w"> 
+</span><span class="o">&gt;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">i</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="m">1</span><span class="o">:</span><span class="m">3</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span><span class="o">+</span><span class="w">   </span><span class="c1"># Advance page and query</span><span class="w">
+</span><span class="o">+</span><span class="w">   </span><span class="n">query_params</span><span class="o">$</span><span class="n">pageNumber</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">i</span><span class="w">
+</span><span class="o">+</span><span class="w">   </span><span class="n">response</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">GET</span><span class="p">(</span><span class="n">paste0</span><span class="p">(</span><span class="n">api</span><span class="p">,</span><span class="w"> </span><span class="n">path</span><span class="p">),</span><span class="w"> </span><span class="n">query</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">query_params</span><span class="p">)</span><span class="w"> 
+</span><span class="o">+</span><span class="w">   </span><span class="n">page</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">content</span><span class="p">(</span><span class="n">response</span><span class="p">,</span><span class="w"> </span><span class="n">as</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'parsed'</span><span class="p">)</span><span class="w">
+</span><span class="o">+</span><span class="w"> 
+</span><span class="o">+</span><span class="w">   </span><span class="c1"># Convert nested list to data frame</span><span class="w">
+</span><span class="o">+</span><span class="w">   </span><span class="n">values</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">tibble</span><span class="p">(</span><span class="n">food</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">page</span><span class="o">$</span><span class="n">foods</span><span class="p">)</span><span class="w"> </span><span class="o">%&gt;%</span><span class="w">
+</span><span class="o">+</span><span class="w">     </span><span class="n">unnest_wider</span><span class="p">(</span><span class="n">food</span><span class="p">)</span><span class="w"> </span><span class="o">%&gt;%</span><span class="w">
+</span><span class="o">+</span><span class="w">     </span><span class="n">unnest_longer</span><span class="p">(</span><span class="n">foodNutrients</span><span class="p">)</span><span class="w"> </span><span class="o">%&gt;%</span><span class="w">
+</span><span class="o">+</span><span class="w">     </span><span class="n">unnest_wider</span><span class="p">(</span><span class="n">foodNutrients</span><span class="p">)</span><span class="w"> </span><span class="o">%&gt;%</span><span class="w">
+</span><span class="o">+</span><span class="w">     </span><span class="n">filter</span><span class="p">(</span><span class="n">grepl</span><span class="p">(</span><span class="s1">'Protein'</span><span class="p">,</span><span class="w"> </span><span class="n">nutrientName</span><span class="p">))</span><span class="w"> </span><span class="o">%&gt;%</span><span class="w">
+</span><span class="o">+</span><span class="w">     </span><span class="n">select</span><span class="p">(</span><span class="n">fdcId</span><span class="p">,</span><span class="w"> </span><span class="n">description</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="p">)</span><span class="w"> </span><span class="o">%&gt;%</span><span class="w">
+</span><span class="o">+</span><span class="w">     </span><span class="n">setNames</span><span class="p">(</span><span class="nf">c</span><span class="p">(</span><span class="s1">'foodID'</span><span class="p">,</span><span class="w"> </span><span class="s1">'name'</span><span class="p">,</span><span class="w"> </span><span class="s1">'protein'</span><span class="p">))</span><span class="w">
+</span><span class="o">+</span><span class="w">   
+</span><span class="o">+</span><span class="w">   </span><span class="c1"># Stash in database</span><span class="w">
+</span><span class="o">+</span><span class="w">   </span><span class="n">dbWriteTable</span><span class="p">(</span><span class="n">cheese_db</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'Food'</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">values</span><span class="p">,</span><span class="w"> </span><span class="n">append</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">TRUE</span><span class="p">)</span><span class="w">
+</span><span class="o">+</span><span class="w">   
+</span><span class="o">+</span><span class="w"> </span><span class="p">}</span><span class="w">
+</span><span class="o">&gt;</span><span class="w"> 
+</span><span class="o">&gt;</span><span class="w"> </span><span class="n">dbDisconnect</span><span class="p">(</span><span class="n">cheese_db</span><span class="p">)</span><span class="w">
+</span></code></pre></div></div>
+
+<p class="notes"><a href="#exercise-3">Return</a></p>
+
+<p class="ToS"><a href="#/slides/exercise">Top of Section</a></p>
+
+
+
+        <hr>
+
+<p>If you need to catch-up before a section of code will work, just squish it's
+🍅 to copy code above it into your clipboard. Then paste into your interpreter's
+console, run, and you'll be ready to start in on that section. Code copied by
+both 🍅 and 📋 will also appear below, where you can edit first, and then copy,
+paste, and run again.</p>
+
+<div class="output">
+  <pre id="ketchup" contenteditable="true"><code># Nothing here yet!</code></pre>
+</div>
+
+<script>
+$(document).ready(function(){
+  
+  // Add code help icons to code blocks
+  $('.input, .text-document').append('<ul class="code-help">');
+  $('.code-help')
+    .append('<li class="clipboard">📋</li>');
+  $('.text-document:not(.no-eval) .code-help')
+    .append('<li class="ketchup">🍅</li>');
+
+  // Bind copy actions to mouse clicks on icons
+  var $ketchup = $('#ketchup');
+  var rng = document.createRange();
+  var sel = window.getSelection();
+  $('.ketchup').click(function(){
+    var $prev = $(this)
+      .parents('.text-document')
+      .prevAll('.text-document:has(.ketchup)');
+    $ketchup.find('code').text($prev.find('pre').text());
+    rng.selectNodeContents($ketchup[0]);
+    sel.removeAllRanges();
+    sel.addRange(rng);
+    document.execCommand("copy");
+    sel.removeAllRanges();
+  });
+  $('.text-document .clipboard').click(function(){
+    var pre = $(this).parents('.text-document').find('pre').text();
+    $ketchup.find('code').text(pre);
+    rng.selectNodeContents($ketchup[0]);
+    sel.removeAllRanges();
+    sel.addRange(rng);
+    document.execCommand("copy");
+    sel.removeAllRanges();
+  });
+  $('.input .clipboard').click(function(){
+    var pre = $(this).parents('.input').find('pre').text();
+    pre = pre.replace(/(^|\n)[>+] /g, '$1');
+    $ketchup.find('code').text(pre);
+    rng.selectNodeContents($ketchup[0]);
+    sel.removeAllRanges();
+    sel.addRange(rng);
+    document.execCommand("copy");
+    sel.removeAllRanges();
+  });
+});
+</script>
+      </div>
+    </div>
+    <script>
+$(document).ready(function(){
+  // Add links to R and Python package repositories
+  $('a.rlib').map(function(){
+    this.href = 'https://cran.r-project.org/package=' + this.innerText;
+  });
+  $('a.pylib').map(function(){
+    this.href = 'https://pypi.python.org/pypi/' + this.innerText;
+  });
+});
+</script>
+
+  </body>
+</html>
