@@ -209,7 +209,11 @@ a hash that is generated within your Rstudio session every time Rstudio restarts
 it is hard-coded into the file paths for the images and stylesheets. If this is not done, the
 images will appear as "broken links" in the slideshow, and the slides will be formatted incorrectly.
 
-**Important note**: If you display the lesson as a slideshow in the viewer pane using
+### Additional notes on previewing
+
+- It's always a good idea to delete `cache` from the lesson's root directory before building.
+- For lessons that rely on `htmlwidgets` such as `leaflet`, it's a good idea to delete `docs/assets/htmlwidgets` somewhat regularly. This can avoid issues with the build, although it can make for slower builds because some dependencies are big.
+- **Important note**: If you display the lesson as a slideshow in the viewer pane using
 `server::httw('docs/_site', initpath = 'slideshow/')`, the images do not display. This is 
 a feature, not a bug! The idea is for the instructor to generate the plots and other images
 and display them in their "Plots" tab, not on the slide.
@@ -299,7 +303,13 @@ the `lesson-style` repository into a lesson, run `git pull upstream master` from
 the master branch. The `upstream` commits may not have a shared history with the
 `master` branch; it is okay to merge using `--allow-unrelated-histories`.
 
+## Permissions
+
+Add repositories to the [Instructors team page] on GitHub with Write permission for
+members of the Instructors team to push changes on lessons. 
+
 [Reveal.js]: http://lab.hakim.se/reveal-js
 [lessons]: http://www.sesync.org/for-you/cyberinfrastructure/training/%C3%A0-la-carte-lessons
 [lifecycle definitions]: https://github.com/SESYNC-ci/sesync-ci.github.io/blob/master/lesson/lesson-lifecycle.md
 [curriculum]: https://github.com/orgs/SESYNC-ci/projects/2
+[Instructors team page]: https://github.com/orgs/SESYNC-ci/teams/instructors/repositories
