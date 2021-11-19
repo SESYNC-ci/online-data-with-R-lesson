@@ -1,13 +1,13 @@
 title: Online Data with R
 handouts:
  - worksheet.R
-tag: v0.2
+tag: v0.3
 lesson: 6
 instructor: Quentin Read
 lifecycle: beta # status for lifecycle badge
 badgecolor: blue # color for lifecycle badge
 warning: true # whether to include note about lifecycle status
-
+doi: 10.5281/zenodo.5710859
 authors:
   - Quentin Read
   - Ian Carroll
