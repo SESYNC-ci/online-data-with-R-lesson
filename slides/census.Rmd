@@ -102,5 +102,5 @@ ggplot(county_income) +
 ```
 
 For a more in-depth tutorial on R's geospatial data types, check out 
-[SESYNC's lesson on geospatial packages in R](https://cyberhelp.sesync.org/geospatial-packages-in-R-lesson).
+[SESYNC's lesson on geospatial packages in R]({{ site.gh-pages }}/geospatial-packages-in-R-lesson).
 {:.notes}
