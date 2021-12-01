@@ -82,8 +82,9 @@ First inspect the names of the list elements.
 
 
 ~~~
-[1] "foodSearchCriteria" "totalHits"          "currentPage"       
-[4] "totalPages"         "foods"             
+[1] "totalHits"          "currentPage"        "totalPages"        
+[4] "pageList"           "foodSearchCriteria" "foods"             
+[7] "aggregations"      
 ~~~
 {:.output}
 
@@ -102,7 +103,7 @@ how many foods matched our search term, `"fruit"`.
 
 
 ~~~
-[1] 18975
+[1] 38999
 ~~~
 {:.output}
 
@@ -175,13 +176,13 @@ nutrients <- map_dfr(fruit$foodNutrients,
                            name  value
 1                       Protein   0.55
 2             Total lipid (fat)   2.84
-3   Carbohydrate, by difference  84.31
+3   Carbohydrate, by difference  84.30
 4                        Energy 365.00
 5                Alcohol, ethyl   0.00
-6                         Water  11.25
+6                         Water  11.20
 7                      Caffeine   0.00
 8                   Theobromine   0.00
-9  Sugars, total including NLEA  53.37
+9  Sugars, total including NLEA  53.40
 10         Fiber, total dietary   0.00
 ~~~
 {:.output}
@@ -307,17 +308,17 @@ fruit_sugar_content <- dbReadTable(fruit_db, name = 'Food')
 
 
 ~~~
-   foodID                                       name sugar
-1  789246       Fruit leather and fruit snacks candy 53.37
-2  781278 Fruit smoothie, with whole fruit and dairy  8.28
-3  786863 Fruit smoothie, with whole fruit, no dairy  8.20
-4  789150                                Fruit sauce 36.23
-5  786838                                Soup, fruit 14.77
-6  789114                                Fruit syrup 53.00
-7  784748                               Bread, fruit 24.96
-8  167781                              Candied fruit 80.68
-9  784768                      Cheesecake with fruit 15.27
-10 784566                           Croissant, fruit 13.98
+    foodID                                       name sugar
+1  1104047       Fruit leather and fruit snacks candy 53.40
+2  1097696 Fruit smoothie, with whole fruit and dairy  8.23
+3  1102761 Fruit smoothie, with whole fruit, no dairy  8.20
+4  1103961                             Topping, fruit 27.40
+5  1102738                                Soup, fruit  5.87
+6  1100841                         Biscuit with fruit 10.00
+7  1100884                               Bread, fruit 24.80
+8   167781                              Candied fruit 80.70
+9  1100904                      Cheesecake with fruit 15.30
+10 1100710                           Croissant, fruit 14.10
 ~~~
 {:.output}
 

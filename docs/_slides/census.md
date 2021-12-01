@@ -104,11 +104,11 @@ county_income <- get_acs(geography = 'county',
 
 ~~~
 Simple feature collection with 24 features and 5 fields
-geometry type:  MULTIPOLYGON
-dimension:      XY
-bbox:           xmin: -79.48765 ymin: 37.91172 xmax: -75.04894 ymax: 39.72304
-CRS:            4269
-# A tibble: 24 x 6
+Geometry type: MULTIPOLYGON
+Dimension:     XY
+Bounding box:  xmin: -79.48765 ymin: 37.91172 xmax: -75.04894 ymax: 39.72304
+CRS:           4269
+# A tibble: 24 × 6
    GEOID NAME       variable  estimate   moe                            geometry
    <chr> <chr>      <chr>        <dbl> <dbl>                  <MULTIPOLYGON [°]>
  1 24001 Allegany … B19013_0…    44065  1148 (((-79.06756 39.47944, -79.06003 3…
@@ -151,5 +151,5 @@ ggplot(county_income) +
 {:.captioned}
 
 For a more in-depth tutorial on R's geospatial data types, check out 
-[SESYNC's lesson on geospatial packages in R](https://cyberhelp.sesync.org/geospatial-packages-in-R-lesson).
+[SESYNC's lesson on geospatial packages in R]({{ site.gh-pages }}/geospatial-packages-in-R-lesson).
 {:.notes}

@@ -37,7 +37,7 @@ response
 
 ~~~
 Response [http://research.jisao.washington.edu/pdo/PDO.latest]
-  Date: 2020-08-10 16:06
+  Date: 2021-12-01 14:50
   Status: 200
   Content-Type: <unknown>
   Size: 12.3 kB
@@ -138,7 +138,7 @@ str_extract_all(pdo_text_2017[1], "[0-9-.]+")
 
 
 You can learn more about how to use regular expressions to extract information
-from text strings in [SESYNC's text mining lesson](https://cyberhelp.sesync.org/text-mining-lesson/).
+from text strings in [SESYNC's text mining lesson]({{ site.gh-pages }}/text-mining-lesson/).
 {:.notes}
 
 ===
@@ -189,27 +189,15 @@ census_vars <- html_table(table_raw, fill = TRUE)
 
 
 ~~~
-             Name           Label                                   Concept
-1 25110 variables 25110 variables                           25110 variables
-2          AIANHH       Geography                                          
-3          AIHHTL       Geography                                          
-4           AIRES       Geography                                          
-5            ANRC       Geography                                          
-6     B00001_001E Estimate!!Total UNWEIGHTED SAMPLE COUNT OF THE POPULATION
-         Required      Attributes           Limit    Predicate Type
-1 25110 variables 25110 variables 25110 variables   25110 variables
-2    not required                               0 (not a predicate)
-3    not required                               0 (not a predicate)
-4    not required                               0 (not a predicate)
-5    not required                               0 (not a predicate)
-6    not required    B00001_001EA               0               int
-            Group              NA
-1 25110 variables 25110 variables
-2             N/A            <NA>
-3             N/A            <NA>
-4             N/A            <NA>
-5             N/A            <NA>
-6          B00001            <NA>
+# A tibble: 6 × 9
+  Name   Label  Concept   Required Attributes Limit `Predicate Type` Group ``   
+  <chr>  <chr>  <chr>     <chr>    <chr>      <chr> <chr>            <chr> <chr>
+1 25111… 25111… "25111 v… 25111 v… "25111 va… 2511… 25111 variables  2511… 2511…
+2 AIANHH Geogr… ""        not req… ""         0     (not a predicat… N/A   <NA> 
+3 AIHHTL Geogr… ""        not req… ""         0     (not a predicat… N/A   <NA> 
+4 AIRES  Geogr… ""        not req… ""         0     (not a predicat… N/A   <NA> 
+5 ANRC   Geogr… ""        not req… ""         0     (not a predicat… N/A   <NA> 
+6 B0000… Estim… "UNWEIGH… not req… "B00001_0… 0     int              B000… <NA> 
 ~~~
 {:.output}
 
@@ -242,50 +230,20 @@ census_vars %>%
 
 
 ~~~
-           Name
-1   B19013_001E
-2  B19013A_001E
-3  B19013B_001E
-4  B19013C_001E
-5  B19013D_001E
-6  B19013E_001E
-7  B19013F_001E
-8  B19013G_001E
-9  B19013H_001E
-10 B19013I_001E
-11  B19049_001E
-12  B19049_002E
-13  B19049_003E
-14  B19049_004E
-15  B19049_005E
-16  B25099_001E
-17  B25099_002E
-18  B25099_003E
-19  B25119_001E
-20  B25119_002E
-21  B25119_003E
-                                                                                                                         Label
-1                                 Estimate!!Median household income in the past 12 months (in 2017 inflation-adjusted dollars)
-2                                 Estimate!!Median household income in the past 12 months (in 2017 inflation-adjusted dollars)
-3                                 Estimate!!Median household income in the past 12 months (in 2017 inflation-adjusted dollars)
-4                                 Estimate!!Median household income in the past 12 months (in 2017 inflation-adjusted dollars)
-5                                 Estimate!!Median household income in the past 12 months (in 2017 inflation-adjusted dollars)
-6                                 Estimate!!Median household income in the past 12 months (in 2017 inflation-adjusted dollars)
-7                                 Estimate!!Median household income in the past 12 months (in 2017 inflation-adjusted dollars)
-8                                 Estimate!!Median household income in the past 12 months (in 2017 inflation-adjusted dollars)
-9                                 Estimate!!Median household income in the past 12 months (in 2017 inflation-adjusted dollars)
-10                                Estimate!!Median household income in the past 12 months (in 2017 inflation-adjusted dollars)
-11                         Estimate!!Median household income in the past 12 months (in 2017 inflation-adjusted dollars)!!Total
-12    Estimate!!Median household income in the past 12 months (in 2017 inflation-adjusted dollars)!!Householder under 25 years
-13    Estimate!!Median household income in the past 12 months (in 2017 inflation-adjusted dollars)!!Householder 25 to 44 years
-14    Estimate!!Median household income in the past 12 months (in 2017 inflation-adjusted dollars)!!Householder 45 to 64 years
-15 Estimate!!Median household income in the past 12 months (in 2017 inflation-adjusted dollars)!!Householder 65 years and over
-16                                                                                    Estimate!!Median household income!!Total
-17                                 Estimate!!Median household income!!Total!!Median household income for units with a mortgage
-18                              Estimate!!Median household income!!Total!!Median household income for units without a mortgage
-19                         Estimate!!Median household income in the past 12 months (in 2017 inflation-adjusted dollars)!!Total
-20      Estimate!!Median household income in the past 12 months (in 2017 inflation-adjusted dollars)!!Owner occupied (dollars)
-21     Estimate!!Median household income in the past 12 months (in 2017 inflation-adjusted dollars)!!Renter occupied (dollars)
+# A tibble: 21 × 2
+   Name         Label                                                           
+   <chr>        <chr>                                                           
+ 1 B19013_001E  Estimate!!Median household income in the past 12 months (in 201…
+ 2 B19013A_001E Estimate!!Median household income in the past 12 months (in 201…
+ 3 B19013B_001E Estimate!!Median household income in the past 12 months (in 201…
+ 4 B19013C_001E Estimate!!Median household income in the past 12 months (in 201…
+ 5 B19013D_001E Estimate!!Median household income in the past 12 months (in 201…
+ 6 B19013E_001E Estimate!!Median household income in the past 12 months (in 201…
+ 7 B19013F_001E Estimate!!Median household income in the past 12 months (in 201…
+ 8 B19013G_001E Estimate!!Median household income in the past 12 months (in 201…
+ 9 B19013H_001E Estimate!!Median household income in the past 12 months (in 201…
+10 B19013I_001E Estimate!!Median household income in the past 12 months (in 201…
+# … with 11 more rows
 ~~~
 {:.output}
 

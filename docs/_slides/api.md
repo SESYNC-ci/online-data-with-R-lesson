@@ -89,20 +89,20 @@ response
 
 ~~~
 Response [https://api.census.gov/data/2018/acs/acs5?get=NAME%2CB19013_001E&for=county%3A%2A&in=state%3A24]
-  Date: 2020-08-10 16:15
+  Date: 2021-12-01 14:50
   Status: 200
   Content-Type: application/json;charset=utf-8
   Size: 1.25 kB
 [["NAME","B19013_001E","state","county"],
-["Worcester County, Maryland","61145","24","047"],
-["Baltimore city, Maryland","48840","24","510"],
-["Talbot County, Maryland","67204","24","041"],
-["Harford County, Maryland","85942","24","025"],
 ["Howard County, Maryland","117730","24","027"],
+["Prince George's County, Maryland","81969","24","033"],
 ["Anne Arundel County, Maryland","97810","24","003"],
 ["Baltimore County, Maryland","74127","24","005"],
+["Frederick County, Maryland","91999","24","021"],
 ["Calvert County, Maryland","104301","24","009"],
 ["Garrett County, Maryland","49619","24","023"],
+["Kent County, Maryland","56009","24","029"],
+["Montgomery County, Maryland","106287","24","031"],
 ...
 ~~~
 {:.output}
@@ -182,30 +182,30 @@ county_income <- response %>%
 ~~~
       [,1]                               [,2]          [,3]    [,4]    
  [1,] "NAME"                             "B19013_001E" "state" "county"
- [2,] "Worcester County, Maryland"       "61145"       "24"    "047"   
- [3,] "Baltimore city, Maryland"         "48840"       "24"    "510"   
- [4,] "Talbot County, Maryland"          "67204"       "24"    "041"   
- [5,] "Harford County, Maryland"         "85942"       "24"    "025"   
- [6,] "Howard County, Maryland"          "117730"      "24"    "027"   
- [7,] "Anne Arundel County, Maryland"    "97810"       "24"    "003"   
- [8,] "Baltimore County, Maryland"       "74127"       "24"    "005"   
- [9,] "Calvert County, Maryland"         "104301"      "24"    "009"   
-[10,] "Garrett County, Maryland"         "49619"       "24"    "023"   
-[11,] "Montgomery County, Maryland"      "106287"      "24"    "031"   
-[12,] "Carroll County, Maryland"         "93363"       "24"    "013"   
-[13,] "Queen Anne's County, Maryland"    "92167"       "24"    "035"   
-[14,] "St. Mary's County, Maryland"      "90438"       "24"    "037"   
-[15,] "Charles County, Maryland"         "95924"       "24"    "017"   
-[16,] "Dorchester County, Maryland"      "52145"       "24"    "019"   
-[17,] "Washington County, Maryland"      "59719"       "24"    "043"   
-[18,] "Wicomico County, Maryland"        "56608"       "24"    "045"   
-[19,] "Cecil County, Maryland"           "72845"       "24"    "015"   
-[20,] "Caroline County, Maryland"        "54956"       "24"    "011"   
-[21,] "Somerset County, Maryland"        "42165"       "24"    "039"   
-[22,] "Allegany County, Maryland"        "44065"       "24"    "001"   
-[23,] "Prince George's County, Maryland" "81969"       "24"    "033"   
-[24,] "Frederick County, Maryland"       "91999"       "24"    "021"   
-[25,] "Kent County, Maryland"            "56009"       "24"    "029"   
+ [2,] "Howard County, Maryland"          "117730"      "24"    "027"   
+ [3,] "Prince George's County, Maryland" "81969"       "24"    "033"   
+ [4,] "Anne Arundel County, Maryland"    "97810"       "24"    "003"   
+ [5,] "Baltimore County, Maryland"       "74127"       "24"    "005"   
+ [6,] "Frederick County, Maryland"       "91999"       "24"    "021"   
+ [7,] "Calvert County, Maryland"         "104301"      "24"    "009"   
+ [8,] "Garrett County, Maryland"         "49619"       "24"    "023"   
+ [9,] "Kent County, Maryland"            "56009"       "24"    "029"   
+[10,] "Montgomery County, Maryland"      "106287"      "24"    "031"   
+[11,] "Carroll County, Maryland"         "93363"       "24"    "013"   
+[12,] "Queen Anne's County, Maryland"    "92167"       "24"    "035"   
+[13,] "St. Mary's County, Maryland"      "90438"       "24"    "037"   
+[14,] "Charles County, Maryland"         "95924"       "24"    "017"   
+[15,] "Dorchester County, Maryland"      "52145"       "24"    "019"   
+[16,] "Washington County, Maryland"      "59719"       "24"    "043"   
+[17,] "Wicomico County, Maryland"        "56608"       "24"    "045"   
+[18,] "Cecil County, Maryland"           "72845"       "24"    "015"   
+[19,] "Caroline County, Maryland"        "54956"       "24"    "011"   
+[20,] "Worcester County, Maryland"       "61145"       "24"    "047"   
+[21,] "Talbot County, Maryland"          "67204"       "24"    "041"   
+[22,] "Baltimore city, Maryland"         "48840"       "24"    "510"   
+[23,] "Somerset County, Maryland"        "42165"       "24"    "039"   
+[24,] "Harford County, Maryland"         "85942"       "24"    "025"   
+[25,] "Allegany County, Maryland"        "44065"       "24"    "001"   
 ~~~
 {:.output}
 
