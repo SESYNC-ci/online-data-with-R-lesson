@@ -1,5 +1,5 @@
 [![lifecycle](https://img.shields.io/badge/lifecycle-beta-blue.svg)](https://github.com/SESYNC-ci/sesync-ci.github.io/blob/master/lesson/lesson-lifecycle.md#beta)
-[![DOI](https://zenodo.org/badge/271012380.svg)](https://zenodo.org/badge/latestdoi/271012380)
+[![DOI](https://zenodo.org/badge/DOI/110.5281/zenodo.5710858.svg)](https://doi.org/110.5281/zenodo.5710858)
 
 ## Online Data with R
 
